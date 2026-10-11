@@ -57,19 +57,29 @@ CROSS JOIN southern_tip t
 ORDER BY c.claims DESC
 LIMIT 10;
 
--- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift):
---   ZIP   | CLAIMS | KM_FROM_SOUTHERN_TIP | NEAR_SOUTHERN_TIP (3 km)
---   10009 |   94   |  4.9                 | FALSE   East Village
---   10013 |   80   |  3.1                 | FALSE   Tribeca / SoHo
---   10038 |   74   |  2.1                 | TRUE    Seaport
---   10011 |   62   |  5.5                 | FALSE   Chelsea
---   10029 |   58   | 12.5                 | FALSE   East Harlem
---   ... 10 rows. Only 10038 and 10004 are TRUE at 3 km.
+-- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift).
+-- 10 rows, in this order:
+--
+--   ZIP   | CLAIMS | MEAN_BLDG_PAID | AREA_KM2 | KM_FROM_SOUTHERN_TIP | NEAR_SOUTHERN_TIP
+--   10009 |     94 |         128165 |     1.60 |                  4.9 | FALSE
+--   10013 |     80 |         242294 |     1.41 |                  3.1 | FALSE
+--   10038 |     74 |         268773 |     0.75 |                  2.1 | TRUE
+--   10011 |     62 |         239722 |     1.67 |                  5.5 | FALSE
+--   10029 |     58 |         109056 |     3.03 |                 12.5 | FALSE
+--   10014 |     42 |         445064 |     1.25 |                  4.6 | FALSE
+--   10004 |     29 |         433761 |     1.18 |                  0.0 | TRUE
+--   10128 |     27 |          99119 |     1.17 |                 11.3 | FALSE
+--   10010 |     24 |         209605 |     0.95 |                  5.8 | FALSE
+--   10035 |     23 |         113958 |     3.63 |                 13.5 | FALSE
+--
+-- Neighborhoods: 10009 East Village, 10013 Tribeca/SoHo, 10038 Seaport,
+-- 10011 Chelsea, 10029 East Harlem, 10014 West Village, 10004 Battery Park,
+-- 10128 Upper East Side, 10010 Gramercy, 10035 East Harlem.
 --
 -- Interpret: the ZIP with the most claims is not at the tip. 10009 is the
 -- East Village, on the East River, and East Harlem, 12.5 km north, is fifth.
 -- The surge pushed up both rivers, not just into the Financial District.
 --
--- Your change: set within_m to 6000 and rerun. Six more ZIPs turn TRUE.
--- East Harlem (10029), 10128 and 10035 stay FALSE: distance from the tip
--- does not explain where Manhattan flooded.
+-- Your change: set within_m to 6000 and rerun. Five more ZIPs turn TRUE:
+-- 10009, 10013, 10011, 10014 and 10010. 10029, 10128 and 10035 stay FALSE,
+-- so distance from the tip does not explain where Manhattan flooded.

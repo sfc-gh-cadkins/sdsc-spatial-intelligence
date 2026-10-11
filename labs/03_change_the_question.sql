@@ -44,13 +44,24 @@ FROM county_stats c
 JOIN IDENTIFIER($geo_index) g ON g.geo_id = c.county_geo_id
 ORDER BY rank_by_count;
 
--- Expected with min_claims = 500 (snapshot 2026-10-09):
---   COUNTY           CLAIMS  MEAN PAID  RANK BY COUNT  RANK BY MEAN
---   Ocean County     37,459    $59,274        1              9
---   Nassau County    26,964    $67,115        2              6
---   Atlantic County  11,344    $35,224        4             12
---   Brooklyn          3,561    $81,335        9              2
---   Manhattan           668   $236,483       13              1   <-- 223 of 668 missing
+-- Expected with min_claims = 500 (snapshot 2026-10-11; the listing refreshes,
+-- so expect small drift). 14 rows, in this order:
+--
+--   COUNTY           | CLAIM_RECORDS | PAID_DENOMINATOR | PAID_MISSING | MEAN_BLDG_PAID_USD | RANK_BY_COUNT | RANK_BY_MEAN_PAID
+--   Ocean County     |         37459 |            34738 |         2721 |              59274 |             1 |                 9
+--   Nassau County    |         26964 |            25878 |         1086 |              67115 |             2 |                 6
+--   Suffolk County   |         13167 |            12193 |          974 |              62311 |             3 |                 7
+--   Atlantic County  |         11344 |            10436 |          908 |              35224 |             4 |                12
+--   Cape May County  |         10060 |             8665 |         1395 |              27857 |             5 |                14
+--   Monmouth County  |         10032 |             9425 |          607 |              74362 |             6 |                 4
+--   Queens           |          7639 |             7372 |          267 |              74836 |             7 |                 3
+--   Richmond County  |          4095 |             3998 |           97 |              54333 |             8 |                10
+--   Brooklyn         |          3561 |             3400 |          161 |              81335 |             9 |                 2
+--   Hudson County    |          2327 |             1934 |          393 |              59990 |            10 |                 8
+--   Bergen County    |          2072 |             1913 |          159 |              51821 |            11 |                11
+--   Middlesex County |           742 |              694 |           48 |              68370 |            12 |                 5
+--   Manhattan        |           668 |              445 |          223 |             236483 |            13 |                 1
+--   Bronx County     |           537 |              415 |          122 |              28623 |            14 |                13
 --
 -- The story flips: Manhattan has relatively few claim records but the highest
 -- mean building payout. Ocean County has the most records but ranks 9th on

@@ -61,17 +61,32 @@ CROSS JOIN manhattan m
 WHERE ST_DWITHIN(s.boundary, m.boundary, $distance_m)
 ORDER BY c.claim_records DESC;
 
--- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift):
---   15 counties. Top rows by claim_records:
---     Nassau County   26,964  |  Monmouth County 10,032  |  Queens          7,639
---     Richmond County  4,095  |  Brooklyn         3,561  |  Hudson County   2,327
---   Manhattan itself is 10th with 668 claims.
+-- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift).
+-- 15 rows, in this order:
+--
+--   COUNTY             | CLAIM_RECORDS | RECORDS_WITH_BLDG_PAYMENT | BLDG_PAID_USD | KM_FROM_MANHATTAN
+--   Nassau County      |         26964 |                     25878 |    1736813194 |              11.3
+--   Monmouth County    |         10032 |                      9425 |     700861923 |              18.2
+--   Queens             |          7639 |                      7372 |     551691235 |               0.0
+--   Richmond County    |          4095 |                      3998 |     217222969 |               4.1
+--   Brooklyn           |          3561 |                      3400 |     276539111 |               0.0
+--   Hudson County      |          2327 |                      1934 |     116020809 |               0.0
+--   Bergen County      |          2072 |                      1913 |      99132854 |               0.0
+--   Middlesex County   |           742 |                       694 |      47448716 |              17.0
+--   Manhattan          |           668 |                       445 |     105234919 |               0.0
+--   Bronx County       |           537 |                       415 |      11878494 |               0.0
+--   Westchester County |           438 |                       363 |      23505453 |               3.7
+--   Union County       |           167 |                       131 |       9062853 |               7.7
+--   Rockland County    |           121 |                       104 |       9088409 |              13.1
+--   Essex County       |           111 |                        83 |      10990479 |               5.7
+--   Passaic County     |            38 |                        20 |        788003 |              11.6
 --
 --   Notice who is MISSING: Ocean County, NJ, the hardest-hit county of the
 --   whole event with 37,459 claim records. It's 60.6 km from Manhattan.
 --   The distance you choose decides the answer you get.
 --
--- Your change: set distance_m to 75000 and rerun. Ocean County appears at #1.
+-- Your change: set distance_m to 75000 and rerun. 25 rows. Ocean County is
+-- first (37459 claims, 60.6 km) and Suffolk County is third (13167, 34.8 km).
 --
 -- Interpret: the shared dataset became part of the analysis, and geography
 -- became a joinable dimension, not a screenshot.
