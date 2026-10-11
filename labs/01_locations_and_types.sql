@@ -1,49 +1,75 @@
 -- =============================================================================
--- Lab A · Turn coordinates into a relationship        (pillars 1 + 2 · 3 min)
+-- Lab A · Where did Sandy hit Manhattan?                (pillar 1 · 3 min)
 -- =============================================================================
--- Question: Which of these locations falls inside this study area?
+-- Question: Which Manhattan ZIP codes filed the most Hurricane Sandy flood
+-- claims, and how far is each one from the southern tip, where the surge
+-- came ashore?
 --
--- ALL DATA HERE IS SYNTHETIC. Three made-up sites and one rectangle near New
--- York. This teaches mechanics. It says nothing about real flood risk.
+-- Data: real FEMA NFIP claims and real ZIP code boundaries, both from the free
+-- "Snowflake Public Data (Free)" Marketplace listing. Nothing is made up.
 --
--- Two things to notice:
---   * ST_MAKEPOINT takes (LONGITUDE, LATITUDE) — x before y.
---     (H3_LATLNG_TO_CELL takes latitude first. Watch the order.)
---   * GEOGRAPHY models the Earth as a sphere (WGS84). Distances come back in
---     metres. GEOMETRY is planar; its units depend on the coordinate system.
+-- What you'll see:
+--   TO_GEOGRAPHY turns a ZIP boundary stored as text into a real shape.
+--   ST_AREA, ST_CENTROID and ST_DISTANCE measure it on the Earth's surface,
+--   in metres, with no GIS tool and no export.
+--
+-- Privacy note: FEMA rounds public claim coordinates, so we count claims by
+-- the ZIP code FEMA assigns. We never place an individual claim on the map.
 -- =============================================================================
 
 USE WAREHOUSE SDSC_WORKSHOP_WH;
 
-WITH study_area AS (
-  SELECT TO_GEOGRAPHY(
-    'POLYGON((-74.05 40.57, -73.85 40.57, -73.85 40.70, -74.05 40.70, -74.05 40.57))'
-  ) AS geog
-),
-sites AS (
-  SELECT * FROM VALUES
-    ('Site A (synthetic)', -73.95, 40.63),
-    ('Site B (synthetic)', -73.90, 40.60),
-    ('Site C (synthetic)', -73.70, 40.75)   -- <-- TRY: change -73.70 to -73.88
-  AS t(site, lon, lat)
-)
-SELECT s.site,
-       ST_ASWKT(ST_MAKEPOINT(s.lon, s.lat))                         AS point_wkt,
-       ST_INTERSECTS(ST_MAKEPOINT(s.lon, s.lat), a.geog)             AS inside_study_area,
-       ROUND(ST_DISTANCE(ST_MAKEPOINT(s.lon, s.lat), ST_CENTROID(a.geog))) AS metres_to_centre,
-       ST_DWITHIN(ST_MAKEPOINT(s.lon, s.lat), ST_CENTROID(a.geog), 10000)  AS within_10km_of_centre
-FROM sites s
-CROSS JOIN study_area a
-ORDER BY s.site;
+SET listing_db = 'SNOWFLAKE_PUBLIC_DATA_FREE';   -- <-- change if you renamed it
+SET claims_tbl = $listing_db || '.PUBLIC_DATA_FREE.FEMA_NATIONAL_FLOOD_INSURANCE_PROGRAM_CLAIM_INDEX';
+SET geo_chars  = $listing_db || '.PUBLIC_DATA_FREE.GEOGRAPHY_CHARACTERISTICS';
+SET within_m   = 3000;   -- <-- TRY: change to 6000
 
--- Expected:
---   SITE                | POINT_WKT            | INSIDE | METRES | WITHIN_10KM
---   Site A (synthetic)  | POINT(-73.95 40.63)  | TRUE   |    558 | TRUE
---   Site B (synthetic)  | POINT(-73.9 40.6)    | TRUE   |   5742 | TRUE
---   Site C (synthetic)  | POINT(-73.7 40.75)   | FALSE  |  24652 | FALSE
+WITH manhattan_claims AS (
+  -- Sandy claims in Manhattan (New York County), counted by ZIP code.
+  SELECT zip_geo_id,
+         COUNT(*)                                   AS claims,
+         ROUND(AVG(amount_paid_on_building_claim))  AS mean_bldg_paid
+  FROM IDENTIFIER($claims_tbl)
+  WHERE flood_event = 'Hurricane Sandy'
+    AND county_geo_id = 'geoId/36061'
+  GROUP BY zip_geo_id
+),
+zip_shapes AS (
+  -- Real ZIP boundaries, stored as WKT text, turned into GEOGRAPHY.
+  SELECT geo_id, TO_GEOGRAPHY(value) AS geog
+  FROM IDENTIFIER($geo_chars)
+  WHERE relationship_type = 'coordinates_wkt'
+    AND geo_id IN (SELECT zip_geo_id FROM manhattan_claims)
+),
+southern_tip AS (
+  -- ZIP 10004 is the southern tip of Manhattan: Battery Park and the Financial District.
+  SELECT ST_CENTROID(geog) AS pt FROM zip_shapes WHERE geo_id = 'zip/10004'
+)
+SELECT REPLACE(c.zip_geo_id, 'zip/', '')                          AS zip,
+       c.claims,
+       c.mean_bldg_paid,
+       ROUND(ST_AREA(z.geog) / 1e6, 2)                             AS area_km2,
+       ROUND(ST_DISTANCE(ST_CENTROID(z.geog), t.pt) / 1000, 1)     AS km_from_southern_tip,
+       ST_DWITHIN(ST_CENTROID(z.geog), t.pt, $within_m)            AS near_southern_tip
+FROM manhattan_claims c
+JOIN zip_shapes z ON z.geo_id = c.zip_geo_id
+CROSS JOIN southern_tip t
+ORDER BY c.claims DESC
+LIMIT 10;
+
+-- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift):
+--   ZIP   | CLAIMS | KM_FROM_SOUTHERN_TIP | NEAR_SOUTHERN_TIP (3 km)
+--   10009 |   94   |  4.9                 | FALSE   East Village
+--   10013 |   80   |  3.1                 | FALSE   Tribeca / SoHo
+--   10038 |   74   |  2.1                 | TRUE    Seaport
+--   10011 |   62   |  5.5                 | FALSE   Chelsea
+--   10029 |   58   | 12.5                 | FALSE   East Harlem
+--   ... 10 rows. Only 10038 and 10004 are TRUE at 3 km.
 --
--- Your change: set Site C's longitude to -73.88 and its latitude to 40.65.
--- Site C's INSIDE value should flip to TRUE.
+-- Interpret: the ZIP with the most claims is not at the tip. 10009 is the
+-- East Village, on the East River, and East Harlem, 12.5 km north, is fifth.
+-- The surge pushed up both rivers, not just into the Financial District.
 --
--- Interpret: the database evaluated "inside" and "within 10 km" itself.
--- You can read and audit the logic — no GIS desktop needed.
+-- Your change: set within_m to 6000 and rerun. Six more ZIPs turn TRUE.
+-- East Harlem (10029), 10128 and 10035 stay FALSE: distance from the tip
+-- does not explain where Manhattan flooded.

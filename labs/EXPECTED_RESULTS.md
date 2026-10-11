@@ -13,15 +13,24 @@ of a few rows is expected; a difference of thousands means a filter changed.
 | County boundaries readable | OK | 1 |
 | Native GEOGRAPHY works | OK | NULL |
 
-## Lab A · Locations and types (synthetic)
+## Lab A · Where did Sandy hit Manhattan?
 
-| SITE | POINT_WKT | INSIDE_STUDY_AREA | METRES_TO_CENTRE | WITHIN_10KM |
-|---|---|---|---|---|
-| Site A (synthetic) | POINT(-73.95 40.63) | TRUE | 558 | TRUE |
-| Site B (synthetic) | POINT(-73.9 40.6) | TRUE | 5,742 | TRUE |
-| Site C (synthetic) | POINT(-73.7 40.75) | FALSE | 24,652 | FALSE |
+Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 3000`:
 
-**After the change** (Site C → `-73.88, 40.65`): INSIDE = TRUE, 6,136 m, WITHIN_10KM = TRUE.
+| ZIP | Neighborhood | CLAIMS | MEAN_BLDG_PAID | AREA_KM2 | KM_FROM_SOUTHERN_TIP | NEAR_SOUTHERN_TIP |
+|---|---|---|---|---|---|---|
+| 10009 | East Village | 94 | 128,165 | 1.60 | 4.9 | FALSE |
+| 10013 | Tribeca / SoHo | 80 | 242,294 | 1.41 | 3.1 | FALSE |
+| 10038 | Seaport | 74 | 268,773 | 0.75 | 2.1 | TRUE |
+| 10011 | Chelsea | 62 | 239,722 | 1.67 | 5.5 | FALSE |
+| 10029 | East Harlem | 58 | 109,056 | 3.03 | 12.5 | FALSE |
+| 10014 | West Village | 42 | 445,064 | 1.25 | 4.6 | FALSE |
+| 10004 | Battery Park / FiDi | 29 | 433,761 | 1.18 | 0.0 | TRUE |
+| 10128 | Upper East Side | 27 | 99,119 | 1.17 | 11.3 | FALSE |
+| 10010 | Gramercy | 24 | 209,605 | 0.95 | 5.8 | FALSE |
+| 10035 | East Harlem | 23 | 113,958 | 3.63 | 13.5 | FALSE |
+
+**After the change** (`within_m = 6000`): 10009, 10013, 10011, 10014 and 10010 also turn TRUE. 10029, 10128 and 10035 stay FALSE.
 
 ## Lab B · County claims (default study area)
 
