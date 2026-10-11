@@ -32,24 +32,24 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 
 **After the change** (`within_m = 6000`): 10009, 10013, 10011, 10014 and 10010 also turn TRUE. 10029, 10128 and 10035 stay FALSE.
 
-## Lab B · County claims (default study area)
+## Lab B · Counties near Manhattan (`distance_m = 25000`)
 
-16 counties returned. Top 8:
+15 counties returned. Top 8:
 
-| COUNTY | CLAIM_RECORDS | RECORDS_WITH_BLDG_PAYMENT |
-|---|---|---|
-| Nassau County | 26,964 | 25,878 |
-| Suffolk County | 13,167 | 12,193 |
-| Monmouth County | 10,032 | 9,425 |
-| Queens | 7,639 | 7,372 |
-| Richmond County | 4,095 | 3,998 |
-| Brooklyn | 3,561 | 3,400 |
-| Hudson County | 2,327 | 1,934 |
-| Bergen County | 2,072 | 1,913 |
+| COUNTY | CLAIM_RECORDS | RECORDS_WITH_BLDG_PAYMENT | KM_FROM_MANHATTAN |
+|---|---|---|---|
+| Nassau County | 26,964 | 25,878 | 11.3 |
+| Monmouth County | 10,032 | 9,425 | 18.2 |
+| Queens | 7,639 | 7,372 | 0.0 |
+| Richmond County | 4,095 | 3,998 | 4.1 |
+| Brooklyn | 3,561 | 3,400 | 0.0 |
+| Hudson County | 2,327 | 1,934 | 0.0 |
+| Bergen County | 2,072 | 1,913 | 0.0 |
+| Middlesex County | 742 | 694 | 17.0 |
 
-Not included: **Ocean County** (37,459 records, the largest in the event) is south of the rectangle.
+Manhattan is 10th with 668. Not included: **Ocean County** (37,459 records, the largest in the event) is 60.6 km away.
 
-**After the change** (south edge 40.45 → 39.70): Ocean County appears at #1 with 37,459.
+**After the change** (`distance_m = 75000`): 25 counties. Ocean County is #1 with 37,459, and Suffolk County (13,167, 34.8 km) is #3.
 
 Reconciliation: 132,388 Hurricane Sandy claim records in NY + NJ. 141 have no `COUNTY_GEO_ID`, so they're excluded before the join.
 

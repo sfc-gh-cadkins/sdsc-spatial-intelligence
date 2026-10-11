@@ -30,7 +30,7 @@ You need a browser and a Snowflake trial account. Nothing to install or clone. Y
 |---|---|---|
 | [`labs/00_setup_and_check.sql`](labs/00_setup_and_check.sql) | 2 min | Creates one X-Small auto-suspending warehouse, then runs a read-only check that every row returns OK |
 | [`labs/01_locations_and_types.sql`](labs/01_locations_and_types.sql) | 3 min | **Lab A:** real Sandy claims by Manhattan ZIP code, with real ZIP boundaries. Where were claims heaviest, and how far from the southern tip? |
-| [`labs/02_county_claims.sql`](labs/02_county_claims.sql) | 5 min | **Lab B:** Sandy claims by county, joined to real county boundaries and filtered spatially |
+| [`labs/02_county_claims.sql`](labs/02_county_claims.sql) | 5 min | **Lab B:** Sandy claims by county, with real county boundaries. Which counties near Manhattan were hit hardest? |
 | [`labs/03_change_the_question.sql`](labs/03_change_the_question.sql) | 4 min | **Lab C:** rank by mean payout instead of count, and watch the story change |
 | [`labs/99_cleanup.sql`](labs/99_cleanup.sql) | 1 min | Optional. Drops only the workshop warehouse |
 

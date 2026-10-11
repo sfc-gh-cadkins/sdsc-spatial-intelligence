@@ -1,22 +1,18 @@
 -- =============================================================================
 -- Lab B · Find a historical concentration           (pillars 2 + 3 · 5 min)
 -- =============================================================================
--- Question: Which counties in our study area recorded the most Hurricane Sandy
+-- Question: Which counties near Manhattan recorded the most Hurricane Sandy
 -- flood claims?
 --
--- Data: FEMA NFIP redacted claims + county boundaries, both from the free
--- "Snowflake Public Data (Free)" Marketplace listing. No ETL, no loading.
+-- Data: real FEMA NFIP claims and real county boundaries, both from the free
+-- "Snowflake Public Data (Free)" Marketplace listing. Nothing is made up.
 --
--- IMPORTANT DATA CAVEAT
---   FEMA truncates public claim latitude/longitude to ONE decimal place
---   (~11 km) to protect policyholder privacy, and recommends county or census
---   tract fields for aggregation. So we aggregate by the source COUNTY_GEO_ID,
---   then use real county boundary polygons for the spatial step.
---   We never place individual claims from their coordinates.
+-- Privacy note: FEMA rounds public claim coordinates, so we count claims by
+-- the county FEMA assigns, then use the real county boundaries for the
+-- spatial step. We never place an individual claim on the map.
 --
--- What the spatial predicate does here: it selects COUNTIES whose boundary
--- intersects a study-area rectangle. Totals are whole-county totals — not
--- "claims inside the rectangle".
+-- What the spatial step does: it keeps every county whose boundary comes
+-- within distance_m of Manhattan's boundary. Totals are whole-county totals.
 -- =============================================================================
 
 USE WAREHOUSE SDSC_WORKSHOP_WH;
@@ -25,63 +21,57 @@ SET listing_db = 'SNOWFLAKE_PUBLIC_DATA_FREE';   -- <-- change if you renamed it
 SET claims_tbl = $listing_db || '.PUBLIC_DATA_FREE.FEMA_NATIONAL_FLOOD_INSURANCE_PROGRAM_CLAIM_INDEX';
 SET geo_chars  = $listing_db || '.PUBLIC_DATA_FREE.GEOGRAPHY_CHARACTERISTICS';
 SET geo_index  = $listing_db || '.PUBLIC_DATA_FREE.GEOGRAPHY_INDEX';
+SET distance_m = 25000;   -- <-- TRY: change to 75000
 
-WITH study_area AS (
-  -- Synthetic rectangle covering New York Harbor and surrounding counties.
-  SELECT TO_GEOGRAPHY(
-    'POLYGON((-74.30 40.45, -73.40 40.45, -73.40 40.95, -74.30 40.95, -74.30 40.45))'
-  ) AS geog
-),
-county_claims AS (
-  -- 1. Aggregate claim records by the source county identifier.
+WITH county_claims AS (
+  -- 1. Count Sandy claims in New York and New Jersey by county.
   SELECT county_geo_id,
          COUNT(*)                              AS claim_records,
          COUNT(amount_paid_on_building_claim)  AS records_with_bldg_payment,
          SUM(amount_paid_on_building_claim)    AS bldg_paid_usd
   FROM IDENTIFIER($claims_tbl)
-  WHERE flood_event   = 'Hurricane Sandy'           -- event label from FEMA
+  WHERE flood_event   = 'Hurricane Sandy'
     AND state_geo_id IN ('geoId/36', 'geoId/34')    -- New York, New Jersey
     AND county_geo_id IS NOT NULL
   GROUP BY county_geo_id
 ),
 county_shapes AS (
-  -- 2. One boundary per county, converted from WKT to native GEOGRAPHY.
+  -- 2. One real boundary per county, turned from WKT text into GEOGRAPHY.
   SELECT geo_id, TRY_TO_GEOGRAPHY(value) AS boundary
   FROM IDENTIFIER($geo_chars)
   WHERE relationship_type = 'coordinates_wkt'
     AND geo_id IN (SELECT county_geo_id FROM county_claims)
   QUALIFY ROW_NUMBER() OVER (PARTITION BY geo_id
                              ORDER BY relationship_start_date DESC NULLS LAST) = 1
+),
+manhattan AS (
+  -- 3. Manhattan (New York County) is our anchor.
+  SELECT boundary FROM county_shapes WHERE geo_id = 'geoId/36061'
 )
--- 3. Join on the identifier, then filter spatially.
-SELECT g.geo_name                       AS county,
-       c.county_geo_id,
+-- 4. Join on the county ID, then keep counties within distance_m of Manhattan.
+SELECT g.geo_name                                          AS county,
        c.claim_records,
        c.records_with_bldg_payment,
-       ROUND(c.bldg_paid_usd)           AS bldg_paid_usd
+       ROUND(c.bldg_paid_usd)                              AS bldg_paid_usd,
+       ROUND(ST_DISTANCE(s.boundary, m.boundary) / 1000, 1) AS km_from_manhattan
 FROM county_claims  c
 JOIN county_shapes  s ON s.geo_id = c.county_geo_id
 JOIN IDENTIFIER($geo_index) g ON g.geo_id = c.county_geo_id
-CROSS JOIN study_area a
-WHERE ST_INTERSECTS(s.boundary, a.geog)
+CROSS JOIN manhattan m
+WHERE ST_DWITHIN(s.boundary, m.boundary, $distance_m)
 ORDER BY c.claim_records DESC;
 
--- Expected (snapshot 2026-10-09 — the listing refreshes, so expect small drift):
---   16 counties. Top rows by claim_records:
---     Nassau County   26,964  |  Suffolk County 13,167  |  Monmouth County 10,032
---     Queens           7,639  |  Richmond County 4,095  |  Brooklyn         3,561
---     Hudson County    2,327  |  Bergen County   2,072  |  ...
+-- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift):
+--   15 counties. Top rows by claim_records:
+--     Nassau County   26,964  |  Monmouth County 10,032  |  Queens          7,639
+--     Richmond County  4,095  |  Brooklyn         3,561  |  Hudson County   2,327
+--   Manhattan itself is 10th with 668 claims.
 --
---   Notice who is MISSING: Ocean County, NJ — the single largest county in the
---   whole event with 37,459 claim records. Its boundary sits south of 40.45.
---   The study area you draw decides the answer you get.
+--   Notice who is MISSING: Ocean County, NJ, the hardest-hit county of the
+--   whole event with 37,459 claim records. It's 60.6 km from Manhattan.
+--   The distance you choose decides the answer you get.
 --
---   Reconciliation: 132,388 Sandy claim records in NY + NJ; 141 have no
---   county_geo_id and are excluded before the join.
---
--- Your change: move the rectangle's southern edge from 40.45 to 39.70
--- (replace all THREE 40.45 values in the POLYGON). Ocean County now appears at #1
--- with 37,459 claim records.
+-- Your change: set distance_m to 75000 and rerun. Ocean County appears at #1.
 --
 -- Interpret: the shared dataset became part of the analysis, and geography
--- became a joinable dimension — not a screenshot.
+-- became a joinable dimension, not a screenshot.

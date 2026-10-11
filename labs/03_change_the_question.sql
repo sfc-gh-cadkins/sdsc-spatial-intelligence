@@ -5,7 +5,7 @@
 -- instead of claim COUNT?
 --
 -- Measure: mean of AMOUNT_PAID_ON_BUILDING_CLAIM over records where it is
--- present. Missing payments are NOT treated as zero — the denominator and the
+-- present. Missing payments are NOT treated as zero, the denominator and the
 -- missing count are shown so you can judge each mean.
 --
 -- This is descriptive history for one event. It is not a calibrated flood
@@ -54,7 +54,7 @@ ORDER BY rank_by_count;
 --
 -- The story flips: Manhattan has relatively few claim records but the highest
 -- mean building payout. Ocean County has the most records but ranks 9th on
--- mean payout. Neither ranking is "right" — they answer different questions.
+-- mean payout. Neither ranking is "right", they answer different questions.
 --
 -- Your change: set min_claims to 5000. Manhattan and Brooklyn drop out
 -- entirely. The threshold you pick changes which story you can tell.
