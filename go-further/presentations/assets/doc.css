@@ -1,0 +1,250 @@
+/* ==========================================================================
+   doc.css — components for tabbed documentation pages
+   Tab and subtab navigation, the cross-section bar, data tables, callouts,
+   metric tiles, legends, learn-more link rails, print rules.
+   Load after base.css. Pair with doc.js for the tab behavior.
+   ========================================================================== */
+
+/* --- sticky bar offset ---------------------------------------------------
+   A multi-part document puts a .section-bar above the tab strip, and both
+   are sticky, so the strip has to clear the bar or the two overlap. Docs
+   with a bar opt in with class="has-section-bar" on <body>; every other
+   page keeps the default 0px and needs no change.
+   ------------------------------------------------------------------------- */
+
+:root { --section-bar-h: 0px; }
+body.has-section-bar { --section-bar-h: 49px; }
+
+/* --- primary tabs --------------------------------------------------------
+   The nav container is populated by doc.js from the panels' data attributes.
+   ------------------------------------------------------------------------- */
+
+.tab-nav { position: sticky; top: var(--section-bar-h); background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; box-shadow: var(--shadow-sm); }
+.tab-nav .container { display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.tab-nav .container::-webkit-scrollbar { height: 5px; }
+.tab-nav .container::-webkit-scrollbar-track { background: transparent; }
+.tab-nav .container::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+.tab-nav .container:hover::-webkit-scrollbar-thumb { background: var(--accent); }
+
+.tab-btn { background: transparent; border: none; padding: 1rem 1.5rem; font-family: inherit; font-size: 0.95rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s ease; white-space: nowrap; }
+.tab-btn:hover { color: var(--accent-deep); background: var(--bg-alt); }
+.tab-btn.is-active { color: var(--accent-deep); border-bottom-color: var(--accent); font-weight: 600; }
+
+.tab-panel { display: none; padding: 2.5rem 0 4rem; animation: fadeIn 0.2s ease; }
+.tab-panel.is-active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- subtabs -------------------------------------------------------------
+   Scoped to the nearest .subtabs ancestor, so a page can nest several sets.
+   ------------------------------------------------------------------------- */
+
+.subtab-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.5rem 0 2rem; }
+.subtab-btn { background: var(--bg-alt); border: 1px solid var(--border-strong); color: var(--text-muted); padding: 0.5rem 1.1rem; font-family: inherit; font-size: 0.9rem; font-weight: 600; border-radius: 999px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+.subtab-btn:hover { color: var(--accent-deep); border-color: var(--accent); background: var(--accent-pale); }
+.subtab-btn.is-active { background: var(--accent-deep); color: #fff; border-color: var(--accent-deep); }
+.subtab-panel { display: none; animation: fadeIn 0.2s ease; }
+.subtab-panel.is-active { display: block; }
+.subtab-panel > h2:first-child { margin-top: 0; }
+
+/* --- section switcher ----------------------------------------------------
+   Links across the section pages of a multi-part document. A light bar that
+   sits BELOW the dark site header, not inside it, and sticks to the top of
+   the viewport.
+
+   The tab strip is sticky too, so it has to clear this bar. Its height is
+   pinned by --section-bar-h at the top of this file, and the bar is kept to
+   a single line at every width (nowrap + horizontal scroll) so that value
+   cannot drift when pills would otherwise wrap.
+   ------------------------------------------------------------------------- */
+
+.section-bar {
+  position: sticky;
+  top: 0;
+  z-index: 101;                 /* above .tab-nav, which is 100 */
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.section-bar .container {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 48px;             /* + 1px border = --section-bar-h */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-bar .container::-webkit-scrollbar { display: none; }
+
+.section-bar a,
+.section-bar .cur {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.36rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.section-bar a { color: var(--text-muted); }
+.section-bar a:hover {
+  color: var(--accent-deep);
+  background: var(--accent-pale);
+  border-color: var(--accent);
+}
+.section-bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.section-bar .cur {
+  background: var(--accent-deep);
+  color: #fff;
+  border-color: var(--accent-deep);
+}
+
+/* "Overview" is the parent chooser, not a sibling section, so it gets an
+   arrow and a divider to set it apart from the section pills. */
+.section-bar .up { margin-right: 0.5rem; }
+.section-bar .up::before { content: '\2190'; margin-right: 0.4rem; }
+.section-bar .up-sep {
+  flex: 0 0 auto;
+  width: 1px;
+  align-self: stretch;
+  margin: 0.6rem 0.6rem 0.6rem 0;
+  background: var(--border);
+}
+
+/* --- metric tiles -------------------------------------------------------- */
+
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0 2rem; }
+.metric-tile { background: linear-gradient(135deg, var(--accent-pale) 0%, #FFFFFF 100%); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow-sm); }
+.metric-value { font-size: 1.5rem; font-weight: 700; color: var(--accent-deep); line-height: 1.2; margin-bottom: 0.25rem; }
+.metric-label { font-size: 0.875rem; color: var(--text-muted); }
+.metric-sublabel { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+/* --- tables -------------------------------------------------------------- */
+
+.data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.925rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table th { background: var(--accent-deep); color: white; text-align: left; padding: 0.75rem 1rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: var(--bg-alt); }
+.data-table.compact { font-size: 0.875rem; }
+.data-table.compact td, .data-table.compact th { padding: 0.5rem 0.75rem; }
+.data-table .area-cell { font-weight: 600; color: var(--accent-deep); white-space: nowrap; }
+
+/* Comparison variant: a row-label column down the left, and one column
+   highlighted as the recommended or default choice. The zebra rule above is
+   more specific than a bare td.hl, so the even-row case is spelled out. */
+.data-table tbody th { background: var(--bg); color: var(--accent-deep); font-weight: 600; font-size: inherit; text-transform: none; letter-spacing: 0; white-space: nowrap; border-bottom: 1px solid var(--border); }
+.data-table tr:nth-child(even) th { background: var(--bg-alt); }
+.data-table thead th.hl { background: var(--accent-darker); }
+.data-table td.hl,
+.data-table tr:nth-child(even) td.hl { background: var(--accent-pale); font-weight: 600; }
+
+/* Wrapper for a table too wide to fit, so the page itself never scrolls. */
+.table-scroll { overflow-x: auto; margin: 1rem 0; }
+.table-scroll .data-table { margin: 0; min-width: 640px; }
+
+/* --- pipeline diagram ----------------------------------------------------
+   Source to destination strip: bordered nodes separated by arrows, built
+   from flex so it wraps on narrow screens. Node accent marks its role.
+   ------------------------------------------------------------------------- */
+
+.pipeline { display: flex; align-items: stretch; gap: 0.5rem; flex-wrap: wrap; margin: 1.25rem 0; }
+.pnode { flex: 1; min-width: 155px; background: var(--bg); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow-sm); }
+.pnode.pn-src { border-left-color: var(--accent-deep); }
+.pnode.pn-dest { border-left-color: var(--success); }
+.pnode.pn-cheap { border-left-color: var(--success); }
+.pnode.pn-cost { border-left-color: var(--warning); }
+.pn-t { font-weight: 700; color: var(--accent-deep); font-size: 0.95rem; }
+.pn-s { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+.parrow { align-self: center; color: var(--text-muted); font-size: 1.25rem; text-align: center; }
+.parrow span { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* --- numbered steps ------------------------------------------------------ */
+
+.step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.1rem; margin: 1.25rem 0; }
+.step-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); }
+.step-num { display: inline-flex; align-items: center; justify-content: center; width: 1.7rem; height: 1.7rem; background: var(--accent-deep); color: #fff; border-radius: 50%; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.6rem; }
+.step-card h3 { margin: 0 0 0.3rem; }
+.step-card p { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
+.step-card p + p { margin-top: 0.5rem; }
+
+
+/* --- callouts ------------------------------------------------------------ */
+
+.callout { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1.5rem 0; border-left: 4px solid var(--accent); background: var(--accent-pale); }
+.callout h4 { margin-top: 0; color: var(--accent-deep); }
+.callout.callout-info { border-left-color: var(--accent); background: var(--accent-pale); }
+.callout.callout-warn { border-left-color: #F59E0B; background: #FFFBEB; }
+.callout.callout-key { border-left-color: var(--success); background: #F1F8F4; }
+.callout.callout-spotlight { border-left-color: var(--accent); background: linear-gradient(135deg, var(--accent-deep) 0%, var(--accent-darker) 100%); color: #EAF6FC; }
+.callout.callout-spotlight h4 { color: #FFFFFF; }
+.callout.callout-spotlight a { color: var(--accent); }
+.callout ol, .callout ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+.callout li { margin-bottom: 0.5rem; }
+
+/* --- code blocks ---------------------------------------------------------
+   Dark block with two hand-applied highlight spans. There is no syntax
+   highlighter here on purpose: mark comments with <span class="cmt"> and
+   keywords with <span class="kw">.
+   ------------------------------------------------------------------------- */
+
+pre {
+  background: var(--accent-darker);
+  color: var(--accent-pale);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  line-height: 1.55;
+  margin: 0.75rem 0;
+}
+pre code { background: none; color: inherit; padding: 0; border: none; }
+pre .cmt { color: var(--accent-cyan); }
+pre .kw { color: #FFD27F; font-weight: 600; }
+
+/* --- two column ---------------------------------------------------------- */
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.5rem 0; align-items: stretch; }
+.two-col .callout { margin: 0; height: 100%; }
+
+/* --- legend -------------------------------------------------------------- */
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin: 1rem 0; }
+.legend-item { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+.legend-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+/* --- learn more rail ----------------------------------------------------- */
+
+.learn-more { margin: 1.75rem 0 0; padding: 0.9rem 1.1rem; background: var(--bg-alt); border: 1px solid var(--border); border-left: 4px solid var(--accent-cyan); border-radius: var(--radius); }
+.learn-more .lm-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-deep); margin-bottom: 0.55rem; }
+.learn-more .lm-links { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.learn-more a { display: inline-block; font-size: 0.85rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: #fff; border: 1px solid var(--border-strong); color: var(--accent-deep); text-decoration: none; transition: all 0.15s ease; line-height: 1.3; }
+.learn-more a:hover { border-color: var(--accent); background: var(--accent-pale); }
+.learn-more .lm-status { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-left: 0.4rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.learn-more .lm-note { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem; }
+
+/* --- responsive ---------------------------------------------------------- */
+
+@media (max-width: 900px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .metric-grid { grid-template-columns: 1fr; }
+  .tab-btn { padding: 0.75rem 1rem; font-size: 0.875rem; }
+  .data-table { font-size: 0.8rem; }
+  .data-table td, .data-table th { padding: 0.5rem; }
+}
+
+/* --- print ---------------------------------------------------------------
+   Expand every tab so a printed or PDF copy contains the whole document.
+   ------------------------------------------------------------------------- */
+
+@media print {
+  .tab-nav, .section-bar { display: none; }
+  .tab-panel { display: block !important; page-break-after: always; }
+  .subtab-panel { display: block !important; }
+  .subtab-nav { display: none; }
+  .callout, .metric-tile { box-shadow: none; }
+}

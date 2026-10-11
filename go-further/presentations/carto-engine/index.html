@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="snowflake-source" content="cortex-agent-authored" />
+<title>CARTO Spatial Engine</title>
+<script type="application/json" id="snowflake-report-metadata">
+{
+  "generated": "2026-09-28",
+  "intent": "CARTO Spatial Engine - deck covering the CARTO MCP Server and advanced spatial capabilities available as agent tools",
+  "sections": [
+    { "id": "capabilities", "title": "CARTO capabilities", "producerNotes": "Static content" }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/base.css" />
+<link rel="stylesheet" href="../assets/deck.css" />
+<link rel="stylesheet" href="../assets/deck-extras.css" />
+<link rel="stylesheet" href="../assets/carto-theme.css" />
+</head>
+<body class="theme-carto">
+
+<a class="deck-home" href="../index.html">&larr; Spatial Intelligence for Insurance</a>
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <section class="slide hero active">
+    <div class="title-brand"><span>CARTO</span><span class="divider">|</span><span>Spatial Engine</span></div>
+    <h1>CARTO Spatial Engine</h1>
+    <div class="title-sub">Advanced spatial operations, reachable from the same conversation</div>
+    <div class="title-foot"><span>Spatial Intelligence for Insurance</span><span>SDSC 2026 New York</span></div>
+  </section>
+
+  <section class="slide hero">
+    <div class="eyebrow">The idea</div>
+    <h2>Show, versus do</h2>
+    <p class="lead">Native geospatial visualization means an agent can <strong>show</strong> you spatial data it already has. CARTO means the agent can <strong>do</strong> spatial operations that are not possible in SQL alone - geocoding, routing, enrichment - by reaching into CARTO as a specialized tool.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">How it connects</div>
+    <h2>CARTO MCP Server</h2>
+    <div class="flow">
+      <span class="step">Agent</span>
+      <span class="arrow">&rarr;</span>
+      <span class="step">MCP connector</span>
+      <span class="arrow">&rarr;</span>
+      <span class="step">CARTO engine</span>
+    </div>
+    <p class="lead">CARTO's spatial engine is registered as an external tool via the Model Context Protocol (MCP). The user never leaves CoWork - the agent decides when a question needs Snowflake SQL versus CARTO's engine, and calls the right one.</p>
+    <ul class="plain">
+      <li>OAuth-governed, observable, revocable at any time</li>
+      <li>Access is per user - each person authorizes with their own CARTO account</li>
+      <li>The token inherits the signed-in user's own CARTO permissions</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Capability</div>
+    <h2>Geocoding</h2>
+    <p class="lead">Convert addresses into map coordinates, at scale, as a callable tool. No separate geocoding service to integrate - the agent calls it mid-conversation.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Capability</div>
+    <h2>Isochrones &amp; routing</h2>
+    <p class="lead">Drive-time and distance-based service area calculations - for example, a 30-minute drive radius around every adjuster office. This is not a SQL function; it requires a routing engine, and CARTO provides one as a tool.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Capability</div>
+    <h2>Data Observatory enrichment</h2>
+    <p class="lead">Append demographic, socioeconomic, and environmental context to your existing spatial data on demand. Turn a damage map into a resilience assessment without leaving the conversation.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Capability</div>
+    <h2>Builder &amp; Workflows</h2>
+    <p class="lead">CARTO Builder creates interactive, shareable maps - the agent can generate one and hand back a URL. Workflows let an analyst build a reusable spatial pipeline once and publish it as an MCP tool any agent can call.</p>
+    <div class="pcard-grid">
+      <div class="pcard">
+        <div class="ind">Build once</div>
+        <div class="out">A Workflow is a reusable spatial analysis pipeline, not a one-off script</div>
+      </div>
+      <div class="pcard">
+        <div class="ind">Use everywhere</div>
+        <div class="out">Published as an MCP tool, any agent with access can call it</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide hero">
+    <div class="eyebrow">Same interface, expanded capability</div>
+    <h2>The user never switches tools</h2>
+    <p class="lead">Ask a question that needs geocoding, routing, or enrichment, and the agent reaches for CARTO transparently. No new application to learn, no export, no context switch.</p>
+    <div class="ruling-cta">
+      Continue to <a href="../getting-started/index.html">Getting Started &rarr;</a>
+    </div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter"></div>
+<div class="navbtns">
+  <button class="navbtn" id="prevBtn" aria-label="Previous slide">&larr;</button>
+  <button class="navbtn" id="nextBtn" aria-label="Next slide">&rarr;</button>
+</div>
+<div class="hint-help">Use &larr; &rarr; or space to navigate</div>
+
+<script src="../assets/deck.js"></script>
+</body>
+</html>

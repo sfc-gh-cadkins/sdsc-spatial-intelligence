@@ -1,0 +1,14 @@
+/* ==========================================================================
+   carto-theme.css — CARTO purple accent palette
+   Load AFTER base.css. Apply .theme-carto to <body> for a fully
+   CARTO-themed page, or to an individual <section> to scope the theme
+   to one slide within a mixed-vendor deck (see Getting Started).
+   ========================================================================== */
+
+.theme-carto {
+  --accent: #7C3AED;
+  --accent-deep: #5B21B6;
+  --accent-darker: #3B0764;
+  --accent-cyan: #C4B5FD;
+  --accent-pale: #F3E8FF;
+}

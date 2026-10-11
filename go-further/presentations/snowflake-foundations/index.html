@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="snowflake-source" content="cortex-agent-authored" />
+<title>Snowflake Foundations</title>
+<script type="application/json" id="snowflake-report-metadata">
+{
+  "generated": "2026-09-28",
+  "intent": "Snowflake Foundations - platform architecture deck covering Semantic Views, Cortex Agents, CoWork, native geo visualization, Marketplace, and AI Gateway",
+  "sections": [
+    { "id": "architecture", "title": "Platform architecture", "producerNotes": "Static content" }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/base.css" />
+<link rel="stylesheet" href="../assets/deck.css" />
+<link rel="stylesheet" href="../assets/deck-extras.css" />
+<link rel="stylesheet" href="../assets/snowflake-theme.css" />
+</head>
+<body class="theme-snowflake">
+
+<a class="deck-home" href="../index.html">&larr; Spatial Intelligence for Insurance</a>
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <section class="slide hero active">
+    <div class="title-brand"><span>Snowflake</span><span class="divider">|</span><span>Foundations</span></div>
+    <h1>Snowflake Foundations</h1>
+    <div class="title-sub">The governed platform underneath every conversation</div>
+    <div class="title-foot"><span>Spatial Intelligence for Insurance</span><span>SDSC 2026 New York</span></div>
+  </section>
+
+  <section class="slide hero">
+    <div class="eyebrow">The idea</div>
+    <h2>Turn a business question into governed SQL, automatically</h2>
+    <p class="lead">Three primitives compose into everything you will see: a <strong>semantic view</strong> that defines what business terms mean, a <strong>Cortex Agent</strong> that orchestrates the conversation, and <strong>tools</strong> the agent can reach for - native SQL, Marketplace data, or an external MCP connector.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Component &middot; the governed translation layer</div>
+    <h2>Semantic Views</h2>
+    <div class="flow">
+      <span class="step">Business question</span>
+      <span class="arrow">&rarr;</span>
+      <span class="step">Semantic View</span>
+      <span class="arrow">&rarr;</span>
+      <span class="step">Correct SQL</span>
+    </div>
+    <p class="lead">A semantic view defines what "exposure" or "risk tier" means in your data, once, in one governed place. Every agent that uses it inherits the same definitions - no one has to know the underlying schema to ask a correct question.</p>
+    <ul class="plain">
+      <li>Defined in YAML, version-controlled like code</li>
+      <li>Encodes relationships between tables, metrics, and business-friendly names</li>
+      <li>The same semantic view can back multiple agents</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Component &middot; the delivery mechanism</div>
+    <h2>Cortex Agents &amp; CoWork</h2>
+    <p class="lead">A Cortex Agent orchestrates tools and answers questions in natural language. Snowflake CoWork is the chat interface where business users actually talk to it - no separate app, no export.</p>
+    <div class="pillars cols-3">
+      <div class="pillar">
+        <h3>Zero code</h3>
+        <p>Ask in plain English. The agent decides which tool to call and how to query it.</p>
+      </div>
+      <div class="pillar">
+        <h3>Governed</h3>
+        <p>Data never leaves Snowflake. Access is controlled by the same roles and grants as everything else.</p>
+      </div>
+      <div class="pillar">
+        <h3>Composable</h3>
+        <p>One agent can hold multiple semantic views and multiple tools, including external ones.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Component &middot; native spatial types and functions</div>
+    <h2>Location is a type, not just two columns</h2>
+    <p class="lead"><code>GEOGRAPHY</code> models the Earth's surface with spherical WGS84 semantics and measures in metres. <code>GEOMETRY</code> is planar, and its units come from its coordinate reference system. Both support points, lines, and polygons, and native functions like <code>ST_INTERSECTS</code> and <code>ST_DWITHIN</code> let you ask "inside" and "near" directly in SQL.</p>
+    <div class="pcard-grid">
+      <div class="pcard">
+        <div class="ind">GEOGRAPHY type</div>
+        <div class="out">Native spatial type with functions like <code>ST_DISTANCE</code>, <code>ST_WITHIN</code>, <code>ST_MAKEPOINT</code></div>
+      </div>
+      <div class="pcard">
+        <div class="ind">H3 indexing</div>
+        <div class="out">Built-in hexagonal spatial indexing for aggregating points into density grids at any resolution</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Component &middot; open data, zero ETL</div>
+    <h2>Snowflake Marketplace</h2>
+    <p class="lead">Third-party geospatial data - like Overture Maps places, buildings, divisions, and transportation networks - arrives as ready-to-query tables. No data pipeline, no procurement cycle, no file drops.</p>
+    <ul class="plain">
+      <li>Import once, query immediately alongside your own data</li>
+      <li>Same agent interface works whether the data is yours or Marketplace-sourced</li>
+      <li>Combine proprietary claims data with open geospatial context in one conversation</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Component &middot; observability and cost governance</div>
+    <h2>Cortex AI Gateway</h2>
+    <p class="lead">Every model call any agent makes flows through one governed control plane - the answer to "how do we control AI usage at scale?"</p>
+    <div class="pillars cols-3">
+      <div class="pillar">
+        <h3>Usage observability</h3>
+        <p>Request volume, latency, tokens, and cost, broken down by model, user, and time window.</p>
+      </div>
+      <div class="pillar">
+        <h3>OpenAI-compatible API</h3>
+        <p>Any app that speaks the OpenAI SDK gets governed access to Snowflake-hosted models, no per-model keys.</p>
+      </div>
+      <div class="pillar">
+        <h3>Cost controls</h3>
+        <p>Rate limits, budget caps, and per-model routing rules, set by administrators.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide hero">
+    <div class="eyebrow">What SQL cannot do alone</div>
+    <h2>Some spatial operations need a specialized engine</h2>
+    <p class="lead">Geocoding, drive-time isochrones, and demographic enrichment are not SQL functions. That is where CARTO comes in - as a tool the same agent can reach for, without the user leaving CoWork.</p>
+    <div class="ruling-cta">
+      Continue to <a href="../carto-engine/index.html">CARTO Spatial Engine &rarr;</a>
+    </div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter"></div>
+<div class="navbtns">
+  <button class="navbtn" id="prevBtn" aria-label="Previous slide">&larr;</button>
+  <button class="navbtn" id="nextBtn" aria-label="Next slide">&rarr;</button>
+</div>
+<div class="hint-help">Use &larr; &rarr; or space to navigate</div>
+
+<script src="../assets/deck.js"></script>
+</body>
+</html>
