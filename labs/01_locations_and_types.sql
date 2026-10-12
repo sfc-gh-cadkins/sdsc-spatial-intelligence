@@ -24,6 +24,10 @@ SET claims_tbl = $listing_db || '.PUBLIC_DATA_FREE.FEMA_NATIONAL_FLOOD_INSURANCE
 SET geo_chars  = $listing_db || '.PUBLIC_DATA_FREE.GEOGRAPHY_CHARACTERISTICS';
 SET within_m   = 3000;   -- <-- TRY: change to 6000
 
+-- Scaling: same query, 16x the compute, one line. Uncomment, rerun, compare
+-- the query time in Query History. (Needs SDSC_WORKSHOP_WH_LARGE from 00.)
+-- USE WAREHOUSE SDSC_WORKSHOP_WH_LARGE;
+
 WITH manhattan_claims AS (
   -- Sandy claims in Manhattan (New York County), counted by ZIP code.
   SELECT zip_geo_id,

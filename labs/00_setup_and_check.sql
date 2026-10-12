@@ -20,6 +20,15 @@ CREATE WAREHOUSE IF NOT EXISTS SDSC_WORKSHOP_WH
   AUTO_SUSPEND   = 60
   AUTO_RESUME    = TRUE
   INITIALLY_SUSPENDED = TRUE;
+
+-- Optional: a Large warehouse for the scaling demo in Lab A. It costs nothing
+-- while suspended, and suspends after 60 seconds idle. Skip it if you like.
+CREATE WAREHOUSE IF NOT EXISTS SDSC_WORKSHOP_WH_LARGE
+  WAREHOUSE_SIZE = 'LARGE'
+  AUTO_SUSPEND   = 60
+  AUTO_RESUME    = TRUE
+  INITIALLY_SUSPENDED = TRUE;
+
 USE WAREHOUSE SDSC_WORKSHOP_WH;
 
 -- Readiness check: read-only. Every row should say OK.
