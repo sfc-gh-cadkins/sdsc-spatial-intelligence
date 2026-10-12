@@ -66,7 +66,7 @@ your data genuinely supports.
 
 ## Step 4 (required): Semantic view
 
-Define your business terms once. `go-further/ai-agent-reference.sql` has a
+Define your business terms once. `go-further/semantic-view-and-agent/create-semantic-view-and-agent.sql` has a
 working semantic view over `ANALYTICS.SANDY_COUNTY_CLAIMS`. It's created with
 the YAML procedure:
 
