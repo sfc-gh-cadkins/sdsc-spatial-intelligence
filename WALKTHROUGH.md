@@ -110,8 +110,8 @@ for data already on a flat, projected map. The lab uses only `GEOGRAPHY`.
 
 ### Step 2 · Functions: counties near Manhattan, ranked two ways
 
-**The question:** which counties near Manhattan were hit hardest, and does the
-answer change if we rank by payout instead of count?
+**The question:** which counties near Manhattan were hit hardest, first by
+number of claims, then by how much was paid per claim?
 
 1. Count Sandy claims by county, with the mean building payout (records with
    no payment are excluded from the mean and counted in `paid_missing`).

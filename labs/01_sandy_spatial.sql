@@ -1,6 +1,6 @@
 -- =============================================================================
--- The Lab · Where did Hurricane Sandy hit, and does the answer change
---           when we change the question?                       (~10 minutes)
+-- The Lab · Where did Hurricane Sandy's flood claims hit hardest, and did
+--           they land where the flood maps said they would?    (~10 minutes)
 -- =============================================================================
 -- One script, three steps, one story:
 --   Step 1  Types      Manhattan ZIP codes as real shapes (GEOGRAPHY).
