@@ -7,7 +7,7 @@
 | NFIP redacted flood claims | FEMA OpenFEMA, republished by Snowflake Public Data Products | `SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE.FEMA_NATIONAL_FLOOD_INSURANCE_PROGRAM_CLAIM_INDEX` |
 | County names / IDs | Snowflake Public Data geography tables | `...PUBLIC_DATA_FREE.GEOGRAPHY_INDEX` |
 | County boundaries (WKT) | Snowflake Public Data geography tables | `...PUBLIC_DATA_FREE.GEOGRAPHY_CHARACTERISTICS` (`relationship_type = 'coordinates_wkt'`) |
-| Lab A claims and ZIP boundaries | FEMA NFIP claims and ZIP code boundaries, Snowflake Public Data (Free) listing | See listing terms |
+| The lab: claims and ZIP boundaries | FEMA NFIP claims and ZIP code boundaries, Snowflake Public Data (Free) listing | See listing terms |
 
 Marketplace listing: **Snowflake Public Data (Free)** —
 <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255>.

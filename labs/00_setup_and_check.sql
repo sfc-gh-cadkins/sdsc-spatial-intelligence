@@ -21,7 +21,7 @@ CREATE WAREHOUSE IF NOT EXISTS SDSC_WORKSHOP_WH
   AUTO_RESUME    = TRUE
   INITIALLY_SUSPENDED = TRUE;
 
--- Optional: a Large warehouse for the scaling demo in Lab A. It costs nothing
+-- Optional: a Large warehouse for the scaling demo in the lab. It costs nothing
 -- while suspended, and suspends after 60 seconds idle. Skip it if you like.
 CREATE WAREHOUSE IF NOT EXISTS SDSC_WORKSHOP_WH_LARGE
   WAREHOUSE_SIZE = 'LARGE'

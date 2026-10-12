@@ -13,7 +13,11 @@ of a few rows is expected; a difference of thousands means a filter changed.
 | County boundaries readable | OK | 1 |
 | Native GEOGRAPHY works | OK | NULL |
 
-## Lab A · Where did Sandy hit Manhattan?
+## The lab (`01_sandy_spatial.sql`, `.py`, `.ipynb`)
+
+All three versions return the same numbers.
+
+### Step 1 · Manhattan by ZIP code
 
 Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 3000`:
 
@@ -32,7 +36,36 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 
 **After the change** (`within_m = 6000`): 10009, 10013, 10011, 10014 and 10010 also turn TRUE. 10029, 10128 and 10035 stay FALSE.
 
-### Lab A, second query: the flood-zone surprise
+### Step 2 · Counties near Manhattan, ranked two ways (`distance_m = 25000`, `min_claims = 500`)
+
+| COUNTY | CLAIM_RECORDS | PAID_MISSING | MEAN_BLDG_PAID_USD | KM_FROM_MANHATTAN | RANK_BY_COUNT | RANK_BY_MEAN_PAID |
+|---|---|---|---|---|---|---|
+| Nassau County | 26964 | 1086 | 67115 | 11.3 | 1 | 6 |
+| Monmouth County | 10032 | 607 | 74362 | 18.2 | 2 | 4 |
+| Queens | 7639 | 267 | 74836 | 0.0 | 3 | 3 |
+| Richmond County | 4095 | 97 | 54333 | 4.1 | 4 | 8 |
+| Brooklyn | 3561 | 161 | 81335 | 0.0 | 5 | 2 |
+| Hudson County | 2327 | 393 | 59990 | 0.0 | 6 | 7 |
+| Bergen County | 2072 | 159 | 51821 | 0.0 | 7 | 9 |
+| Middlesex County | 742 | 48 | 68370 | 17.0 | 8 | 5 |
+| Manhattan | 668 | 223 | 236483 | 0.0 | 9 | 1 |
+| Bronx County | 537 | 122 | 28623 | 0.0 | 10 | 10 |
+
+Manhattan is 9th by count and 1st by mean paid. Ocean County (37,459 claims, 60.6 km) is missing.
+
+**Your change, `distance_m = 75000`:** 12 rows. Top three by count:
+
+| COUNTY | CLAIM_RECORDS | PAID_MISSING | MEAN_BLDG_PAID_USD | KM_FROM_MANHATTAN | RANK_BY_COUNT | RANK_BY_MEAN_PAID |
+|---|---|---|---|---|---|---|
+| Ocean County | 37459 | 2721 | 59274 | 60.6 | 1 | 9 |
+| Nassau County | 26964 | 1086 | 67115 | 11.3 | 2 | 6 |
+| Suffolk County | 13167 | 974 | 62311 | 34.8 | 3 | 7 |
+
+**Then `min_claims = 5000`:** Manhattan and Brooklyn drop out.
+
+**Notebook extras:** the live slider at 5,000 puts Queens first by mean paid ($74,836). The distance sweep's #1 county is Queens at 0-10 km, Nassau from 20 km, and Ocean County from 70 km.
+
+### Step 3 · The flood-zone surprise
 
 | ZIP | CLAIMS | OUTSIDE_HIGH_RISK_ZONE | PCT_OUTSIDE |
 |---|---|---|---|
@@ -48,38 +81,3 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 | 10035 | 23 | 5 | 22 |
 
 All of Manhattan: 188 of 668 Sandy claims (28%) came from policies rated outside FEMA's high-risk ("Special Flood") zone. Mean building paid: $265,319 outside vs $227,798 inside.
-
-## Lab B · Counties near Manhattan (`distance_m = 25000`)
-
-15 counties returned. Top 8:
-
-| COUNTY | CLAIM_RECORDS | RECORDS_WITH_BLDG_PAYMENT | KM_FROM_MANHATTAN |
-|---|---|---|---|
-| Nassau County | 26,964 | 25,878 | 11.3 |
-| Monmouth County | 10,032 | 9,425 | 18.2 |
-| Queens | 7,639 | 7,372 | 0.0 |
-| Richmond County | 4,095 | 3,998 | 4.1 |
-| Brooklyn | 3,561 | 3,400 | 0.0 |
-| Hudson County | 2,327 | 1,934 | 0.0 |
-| Bergen County | 2,072 | 1,913 | 0.0 |
-| Middlesex County | 742 | 694 | 17.0 |
-
-Manhattan is 9th with 668. Not included: **Ocean County** (37,459 records, the largest in the event) is 60.6 km away.
-
-**After the change** (`distance_m = 75000`): 25 counties. Ocean County is #1 with 37,459, and Suffolk County (13,167, 34.8 km) is #3.
-
-Reconciliation: 132,388 Hurricane Sandy claim records in NY + NJ. 141 have no `COUNTY_GEO_ID`, so they're excluded before the join.
-
-## Lab C · Change the question (`min_claims = 500`)
-
-14 counties returned. Selected rows:
-
-| COUNTY | CLAIMS | PAID_DENOMINATOR | PAID_MISSING | MEAN_BLDG_PAID | RANK_BY_COUNT | RANK_BY_MEAN |
-|---|---|---|---|---|---|---|
-| Ocean County | 37,459 | 34,738 | 2,721 | $59,274 | 1 | 9 |
-| Nassau County | 26,964 | 25,878 | 1,086 | $67,115 | 2 | 6 |
-| Atlantic County | 11,344 | 10,436 | 908 | $35,224 | 4 | 12 |
-| Brooklyn | 3,561 | 3,400 | 161 | $81,335 | 9 | 2 |
-| Manhattan | 668 | 445 | 223 | $236,483 | 13 | 1 |
-
-**After the change** (`min_claims = 5000`): 7 counties remain: Ocean, Nassau, Suffolk, Atlantic, Cape May, Monmouth, Queens. Manhattan and Brooklyn are gone.

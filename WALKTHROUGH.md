@@ -13,10 +13,10 @@ clone.
 | 1 | [Marketplace: where the data comes from](#1-marketplace-where-the-data-comes-from) | Yes |
 | 2 | [Catalog: what the data looks like](#2-catalog-what-the-data-looks-like) | Yes |
 | 3 | [Workspaces: where you work](#3-workspaces-where-you-work) | Yes |
-| 4 | [Lab A: spatial types, Manhattan by ZIP code](#4-lab-a-spatial-types-manhattan-by-zip-code) | Yes |
-| 5 | [Lab B: spatial functions, counties near Manhattan](#5-lab-b-spatial-functions-counties-near-manhattan) | Yes |
-| 6 | [AI in the editor: Cortex Code](#6-ai-in-the-editor-cortex-code) | Needs AI features |
-| 7 | [Lab C: change the question](#7-lab-c-change-the-question) | Yes |
+| 4 | [The lab in SQL: types, functions, a surprise](#4-the-lab-in-sql-types-functions-a-surprise) | Yes |
+| 5 | [AI in the editor: Cortex Code](#5-ai-in-the-editor-cortex-code) | Needs AI features |
+| 6 | [The same lab in Python](#6-the-same-lab-in-python) | Yes |
+| 7 | [The same lab as a notebook, with maps](#7-the-same-lab-as-a-notebook-with-maps) | Yes |
 | 8 | [Build the pipeline](#8-build-the-pipeline) | Yes |
 | 9 | [Ecosystem: CARTO on the same data](#9-ecosystem-carto-on-the-same-data) | Needs a CARTO account |
 | 10 | [AI for the business user: CoWork](#10-ai-for-the-business-user-cowork) | Needs AI features |
@@ -72,7 +72,7 @@ The two kinds of table the labs use:
 2. Find rows where `RELATIONSHIP_TYPE = coordinates_wkt`.
 
 **You should see:** boundaries stored as text, in a format called WKT. Text
-isn't a shape yet. Lab A turns it into one.
+isn't a shape yet. The lab turns it into one.
 
 ## 3. Workspaces: where you work
 
@@ -80,14 +80,17 @@ isn't a shape yet. Lab A turns it into one.
 2. **Manage > Compute** lists warehouses. `SDSC_WORKSHOP_WH` is the one the
    setup script created.
 
-## 4. Lab A: spatial types, Manhattan by ZIP code
+## 4. The lab in SQL: types, functions, a surprise
 
-Run [`labs/01_locations_and_types.sql`](labs/01_locations_and_types.sql).
+Run [`labs/01_sandy_spatial.sql`](labs/01_sandy_spatial.sql). It's one script
+with three steps and three knobs at the top (`within_m`, `distance_m`,
+`min_claims`). Run it top to bottom; each step has its expected result
+underneath.
+
+### Step 1 · Types: Manhattan by ZIP code
 
 **The question:** where in Manhattan were Sandy claims heaviest, and was it
 only the southern tip?
-
-How the first query works:
 
 - `manhattan_claims` counts Sandy claims per Manhattan ZIP code.
 - `zip_shapes` uses `TO_GEOGRAPHY` to turn the WKT text into shapes.
@@ -99,83 +102,88 @@ How the first query works:
 5 km north of the tip. East Harlem (10029) is fifth, 12.5 km up.
 
 **Your change:** set `within_m` to `6000` and rerun. Five more ZIPs turn
-`TRUE`, but East Harlem and the Upper East Side stay `FALSE`. Distance from
-the tip doesn't explain where Manhattan flooded.
-
-**The surprise:** run the second query in the file. It counts claims from
-properties rated outside FEMA's high-risk flood zone.
-
-**You should see:** half of East Harlem's claims (29 of 58) came from outside
-the high-risk zone. Across Manhattan it's 188 of 668 claims (28%), and those
-claims were paid more on average: about $265,000 against $228,000 inside the
-zone.
+`TRUE`, but East Harlem stays `FALSE`. Distance from the tip doesn't explain
+where Manhattan flooded.
 
 **Note:** `GEOGRAPHY` measures on the round Earth, in metres. `GEOMETRY` is
-for data that is already on a flat, projected map. These labs use only
-`GEOGRAPHY`.
+for data already on a flat, projected map. The lab uses only `GEOGRAPHY`.
 
-## 5. Lab B: spatial functions, counties near Manhattan
+### Step 2 · Functions: counties near Manhattan, ranked two ways
 
-Run [`labs/02_county_claims.sql`](labs/02_county_claims.sql).
+**The question:** which counties near Manhattan were hit hardest, and does the
+answer change if we rank by payout instead of count?
 
-**The question:** which counties near Manhattan took the most Sandy claims?
+1. Count Sandy claims by county, with the mean building payout (records with
+   no payment are excluded from the mean and counted in `paid_missing`).
+2. Turn each county boundary into a geography (`TRY_TO_GEOGRAPHY`).
+3. Keep counties within 25 km of Manhattan's boundary (`ST_DWITHIN`).
+4. Rank the same counties by count and by mean paid.
 
-The query does four things:
-
-1. It counts Sandy claims by county.
-2. It turns each county boundary into a geography.
-3. It takes Manhattan's boundary as the anchor.
-4. It keeps every county within 25 km of Manhattan (`ST_DWITHIN`).
-
-**You should see:** 15 counties. Nassau is first, Monmouth second, Queens
-third. Manhattan is 9th with 668 claims.
+**You should see:** 10 counties. Nassau is #1 by count. Manhattan is #9 by
+count but **#1 by mean paid** ($236,483), and 223 of its 668 records have no
+payment. Always check what's missing.
 
 **What's missing:** Ocean County, New Jersey, the hardest-hit county of the
-event with 37,459 claims. It's 60 km away.
+event with 37,459 claims. It's 60.6 km away.
 
-**Your change:** set `distance_m` to `75000` and rerun. You get 25 counties,
-with Ocean at #1 and Suffolk joining at #3. The distance you pick decides the
-answer you get.
+**Your change:** set `distance_m` to `75000` and rerun: Ocean County is #1 by
+count. Then set `min_claims` to `5000`: Manhattan and Brooklyn drop out. The
+area you draw and the metric you pick decide the answer.
 
 **Note:** these are whole-county totals for counties near Manhattan, not
 claims inside a circle. FEMA's coordinates aren't precise enough for that.
 
-## 6. AI in the editor: Cortex Code
+### Step 3 · The surprise: were these properties in the flood zone?
+
+**You should see:** half of East Harlem's claims (29 of 58) came from outside
+FEMA's high-risk flood zone. Across Manhattan it's 188 of 668 claims (28%),
+and they were paid more on average: about $265,000 against $228,000.
+
+**Scale it (optional):** uncomment `USE WAREHOUSE SDSC_WORKSHOP_WH_LARGE;`
+near the top and rerun. Same SQL, 16x the compute, one line. Compare the
+times in Query History.
+
+## 5. AI in the editor: Cortex Code
 
 *Needs AI features. On a trial, watch this one on screen.*
 
-1. Open Lab B in a Workspace.
-2. Open **Cortex Code** (CoCo), the AI assistant in Snowsight.
-3. Ask: *"Explain this query step by step for an underwriter."* It describes
-   each step in business language, including the county-level caveat.
-4. Ask: *"Change the distance so Ocean County is included."* Run the edited
-   query. Ocean County should appear at #1, matching your Lab B change.
+1. Open `01_sandy_spatial.sql` in a Workspace and open **Cortex Code** (CoCo).
+2. Ask: *"Explain Step 2 for an underwriter."* It describes each step in
+   business language, including the county-level caveat.
+3. Ask: *"Change the distance so Ocean County is included."* Run it. Ocean
+   should be #1, matching your own change.
+4. Ask: *"Convert this script to Snowpark Python."* Compare the result with
+   [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py).
 
 **The habit:** AI made the change, and you checked it against a result you
 already knew.
 
-## 7. Lab C: change the question
+## 6. The same lab in Python
 
-Run [`labs/03_change_the_question.sql`](labs/03_change_the_question.sql).
+Open [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py) in a Workspace
+(**+ > Python file**, paste, run). Same three steps, same knobs, same numbers,
+written with Snowpark DataFrames. Every `ST_*` function still runs inside
+Snowflake; Python only builds the query.
 
-**The question:** rank by how much was paid per claim instead of how many
-claims there were. Does the story change?
+**You should see:** the same three tables as Section 4.
 
-**You should see:** 14 counties with at least 500 claims. Three rows tell the
-story:
+## 7. The same lab as a notebook, with maps
 
-| County | Rank by count | Rank by mean paid |
-|---|---|---|
-| Ocean County | 1 | 9 |
-| Brooklyn | 9 | 2 |
-| Manhattan | 13 | 1 ($236,483) |
+Upload [`labs/03_sandy_spatial.ipynb`](labs/03_sandy_spatial.ipynb) to a
+Workspace and **Run all**. Same SQL, plus what a worksheet can't do:
 
-Ocean had the most claims, but Manhattan had the most expensive ones. Also,
-223 of Manhattan's 668 claims have no payment recorded. Always check what's
-missing.
+- **Step 1:** a ZIP map of Manhattan, coloured by Sandy claims.
+- **Step 2:** twin county maps (count vs mean paid) and a rank-flip chart.
+- **Step 2, live:** a slider that re-ranks counties by mean paid as you raise
+  the minimum claim count. At 5,000, Manhattan and Brooklyn vanish and Queens
+  leads.
+- **Step 2b:** a Python loop that reruns the spatial query at ten distances.
+  The #1 county goes Queens (up to 10 km), Nassau (from 20 km), then Ocean
+  County (from 70 km).
+- **Step 3:** inside vs outside the high-risk zone, as bars and a map.
 
-**Your change:** set `min_claims` to `5000` and rerun. Seven counties remain,
-and Manhattan and Brooklyn drop out.
+Hover any map for the numbers. Change `distance_m` or `min_claims` in the
+Parameters cell and **Run all** again.
 
 ## 8. Build the pipeline
 
@@ -194,8 +202,8 @@ Marketplace share   SNOWFLAKE_PUBLIC_DATA_FREE          FEMA claims and boundari
   consumers         a map tool, an AI agent, a dashboard
 ```
 
-**You should see:** the top five counties match Lab C (Ocean, Nassau,
-Suffolk, Atlantic, Cape May).
+**You should see:** the top five counties by count are Ocean, Nassau,
+Suffolk, Atlantic and Cape May.
 
 Then:
 
@@ -221,8 +229,8 @@ spatial tool working on the same result, with nothing exported.
 2. In **Data Explorer**, open `SDSC_WORKSHOP.ANALYTICS.SANDY_COUNTY_CLAIMS`.
 3. Create a map in **Builder**. Add the view as a source and style the
    `BOUNDARY` column as a county choropleth by `CLAIM_RECORDS`.
-4. Switch the colour to `MEAN_BLDG_PAID_USD`. That's Lab C, on a map.
-5. Add a filter, for example `CLAIM_RECORDS >= 5000`, to match the Lab C
+4. Switch the colour to `MEAN_BLDG_PAID_USD`. That's Step 2 of the lab, on a map.
+5. Add a filter, for example `CLAIM_RECORDS >= 5000`, to match the lab's
    change.
 6. Share the map. People can explore it without writing SQL.
 
@@ -256,7 +264,7 @@ current steps for connecting to Snowflake.
 **Check three things:**
 
 1. It shows the SQL it ran.
-2. Manhattan's mean is about $236,483, the same as Lab C.
+2. Manhattan's mean is about $236,483, the same as Step 2 of the lab.
 3. It says historical claims are not future risk.
 
 ## 11. Clean up

@@ -10,9 +10,9 @@ presented by Snowflake and CARTO.
 
 | Pillar | What you'll see | Where |
 |---|---|---|
-| **1. Native spatial types** | `GEOGRAPHY` (spherical, WGS84, metres) and `GEOMETRY` (planar, CRS-defined units) | Lab A |
+| **1. Native spatial types** | `GEOGRAPHY` (spherical, WGS84, metres) and `GEOMETRY` (planar, CRS-defined units) | The lab, Step 1 |
 | **2. Native spatial functions** | `ST_DWITHIN`, `ST_DISTANCE`, `ST_AREA`, `ST_CENTROID` | Labs A + B |
-| **3. Ecosystem of data and capabilities** | Free Marketplace data (FEMA NFIP + county boundaries), and CARTO for interactive exploration | Marketplace tour, Lab B, CARTO section |
+| **3. Ecosystem of data and capabilities** | Free Marketplace data (FEMA NFIP + county boundaries), and CARTO for interactive exploration | Marketplace tour, the lab, CARTO section |
 | **4. AI across the workflow** | CoCo explains or edits a query, CoWork answers a question with an inspectable query | AI sections of the walkthrough |
 
 ## Participant path: browser only
@@ -30,13 +30,13 @@ workshop in order: what to click, what to run, and what you should see.
 | File | Time | What it does |
 |---|---|---|
 | [`labs/00_setup_and_check.sql`](labs/00_setup_and_check.sql) | 2 min | Creates one X-Small auto-suspending warehouse, then runs a read-only check that every row returns OK |
-| [`labs/01_locations_and_types.sql`](labs/01_locations_and_types.sql)<br>Python: [`.py`](labs/01_locations_and_types.py) | 3 min | **Lab A:** real Sandy claims by Manhattan ZIP code, with real ZIP boundaries. Where were claims heaviest, and how far from the southern tip? |
-| [`labs/02_county_claims.sql`](labs/02_county_claims.sql) | 5 min | **Lab B:** Sandy claims by county, with real county boundaries. Which counties near Manhattan were hit hardest? |
-| [`labs/03_change_the_question.sql`](labs/03_change_the_question.sql)<br>Notebook: [`.ipynb`](labs/03_change_the_question.ipynb) | 4 min | **Lab C:** rank by mean payout instead of count, and watch the story change |
-| [`labs/04_build_the_pipeline.sql`](labs/04_build_the_pipeline.sql) | 3 min | Turns Labs B and C into two views, the layer a map tool or AI agent reads |
+| [`labs/01_sandy_spatial.sql`](labs/01_sandy_spatial.sql) | 8 min | **The lab, in SQL.** One script, three steps: Manhattan ZIPs as real shapes (types), counties near Manhattan ranked by count vs mean payout (functions), and the flood-zone surprise |
+| [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py) | 2 min | **The same lab, in Snowpark Python.** Same steps, same numbers |
+| [`labs/03_sandy_spatial.ipynb`](labs/03_sandy_spatial.ipynb) | 5 min | **The same lab, as a notebook.** Adds ZIP and county maps, a rank-flip chart, a live slider, and a Python loop over distances |
+| [`labs/04_build_the_pipeline.sql`](labs/04_build_the_pipeline.sql) | 3 min | Turns the lab into two views, the layer a map tool or AI agent reads |
 | [`labs/99_cleanup.sql`](labs/99_cleanup.sql) | 1 min | Optional. Drops only what the workshop created |
 
-Each lab starts with a question. Each one ends with something to change and a question to interpret. Compare your output against [`labs/EXPECTED_RESULTS.md`](labs/EXPECTED_RESULTS.md).
+Each step starts with a question. Each one ends with something to change and a question to interpret. Compare your output against [`labs/EXPECTED_RESULTS.md`](labs/EXPECTED_RESULTS.md).
 
 > **AI note:** Snowflake documentation says AI features are disabled by default in self-service trials until a payment method is added. The core labs are SQL-only on purpose. The AI and CARTO sections are shown on screen, and the walkthrough has the steps if you want to run them yourself later. Please don't add payment details just for this workshop.
 

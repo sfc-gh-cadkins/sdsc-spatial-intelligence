@@ -26,7 +26,7 @@ CREATE SCHEMA IF NOT EXISTS SDSC_WORKSHOP.SEMANTIC;
 
 -- Step 1: the semantic view. It tells the agent what each column means and
 -- how to roll counties up correctly (metrics), so "mean paid" always uses the
--- same definition you used in Lab C.
+-- same definition you used in Step 2 of the lab.
 CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML('SDSC_WORKSHOP.SEMANTIC', $$
 name: SDSC_INSURANCE
 description: Hurricane Sandy NFIP claims by county, NY and NJ.

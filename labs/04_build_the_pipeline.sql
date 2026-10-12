@@ -84,7 +84,7 @@ LIMIT 5;
 -- | Suffolk County  | NY    | 13167         | 12193            | 62311              |
 -- | Atlantic County | NJ    | 11344         | 10436            | 35224              |
 -- | Cape May County | NJ    | 10060         | 8665             | 27857              |
--- These match the first five rows of Lab C. The raw view has 132,388 rows and
+-- These match the top five counties by count (min_claims = 500, no distance filter). The raw view has 132,388 rows and
 -- the county view has 83 counties (50 with at least one Sandy claim).
 
 -- Now open the view in the Catalog and click the Lineage tab: upstream is the
