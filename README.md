@@ -11,7 +11,7 @@ Presented by Caleb Alexander (Snowflake) and Ryan Miller (CARTO).
 | Pillar | What you'll see | Where |
 |---|---|---|
 | **1. Native spatial types** | `GEOGRAPHY` (spherical, WGS84, metres) and `GEOMETRY` (planar, CRS-defined units) | Lab A |
-| **2. Native spatial functions** | `ST_INTERSECTS`, `ST_DWITHIN`, `ST_DISTANCE`, plus H3 as an optional extension | Labs A + B |
+| **2. Native spatial functions** | `ST_DWITHIN`, `ST_DISTANCE`, `ST_AREA`, `ST_CENTROID` | Labs A + B |
 | **3. Ecosystem of data and capabilities** | Free Marketplace data (FEMA NFIP + county boundaries), and CARTO for interactive exploration | Lab B + Ryan's section |
 | **4. AI across the workflow** | Presenter-led: CoCo explains or edits a query, CoWork answers a question with an inspectable query | Presenter demo |
 
@@ -40,7 +40,7 @@ Each lab starts with a question. Each one ends with something to change and a qu
 
 ## Read this before drawing conclusions
 
-FEMA truncates public NFIP claim coordinates to one decimal place (about 11 km) for privacy, and recommends county or census-tract fields for aggregation. These labs therefore aggregate by county and **never** infer property-level locations. This is descriptive history for one event, not a flood-risk model or an underwriting recommendation. See [`SOURCES.md`](SOURCES.md).
+FEMA truncates public NFIP claim coordinates to one decimal place (about 11 km) for privacy, and recommends county or census-tract fields for aggregation. These labs therefore count claims by ZIP code and county and **never** infer property-level locations. This is descriptive history for one event, not a flood-risk model or an underwriting recommendation. See [`SOURCES.md`](SOURCES.md).
 
 ## Go further
 
