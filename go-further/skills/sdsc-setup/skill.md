@@ -4,8 +4,7 @@ description: >
   Set up the Spatial Intelligence for Insurance demo environment on your own
   Snowflake account: database/schema/warehouse, a semantic view, a Cortex
   Agent, a scoped viewer role, and (optionally) the CARTO MCP connector.
-  Sample Hurricane Sandy NFIP data loading is optional -- skip it and point
-  the semantic view at your own geospatial dataset instead. Use when a
+  The data comes free from the Snowflake Marketplace. Use when a
   workshop attendee or reader wants to replicate the SDSC 2026 New York demo,
   or wants a working example of a semantic view + Cortex Agent + MCP
   connector pattern to adapt for a different industry.
@@ -16,9 +15,8 @@ description: >
 This skill recreates the environment behind the **Spatial Intelligence for
 Insurance: From Risk and Exposure to Action** workshop (SDSC 2026 New York).
 It is a reference implementation, not a packaged installer -- read each step,
-adapt names/values to your account, and run the SQL yourself. Steps 1-4 and 6
-are required to get a working agent. Step 5 (CARTO) is optional. The data
-load in step 3b is optional.
+adapt names/values to your account, and run the SQL yourself. Steps 1 to 5 and 7
+are required to get a working agent. Step 6 (CARTO) is optional.
 
 ## What you end up with
 
@@ -45,88 +43,45 @@ CREATE SCHEMA IF NOT EXISTS MY_SPATIAL_DEMO.ANALYTICS;
 CREATE SCHEMA IF NOT EXISTS MY_SPATIAL_DEMO.SEMANTIC;
 ```
 
-## Step 2 (optional): Open geospatial data from the Marketplace
+## Step 2 (required): Get the free data
 
-If you want free, open geospatial context data (places, administrative
-boundaries, buildings, transportation) without any ETL, get it from the
-Marketplace:
+In Snowsight, open **Marketplace**, find **Snowflake Public Data (Free)**, and
+click **Get**. It imports as a share named `SNOWFLAKE_PUBLIC_DATA_FREE`, with
+FEMA's public NFIP claims and county and ZIP code boundaries. Nothing to load.
 
-1. In Snowsight, go to **Data Products &gt; Marketplace**
-2. Search for **Overture Maps** and get the listing
-3. It imports as a share -- query it directly, no loading required
+## Step 3 (required): Your analytical layer
 
-Skip this step entirely if you only need your own proprietary data.
+The workshop builds two views over the share. Run
+`labs/04_build_the_pipeline.sql` from this repo, or adapt it:
 
-## Step 3a (required): Your own analytical tables
+- `RAW.NFIP_CLAIMS_SANDY_NYNJ`: Hurricane Sandy claims for NY and NJ
+- `ANALYTICS.SANDY_COUNTY_CLAIMS`: one row per county, with claim counts,
+  payments, and a `BOUNDARY` column (GEOGRAPHY polygon)
 
-Land your source data in `RAW`, and build whatever aggregation your use case
-needs in `ANALYTICS`. The Sandy reference implementation uses:
-
-- `RAW.NFIP_CLAIMS_SANDY` -- individual claim records with `LATITUDE`,
-  `LONGITUDE`, and coordinate columns
-- `ANALYTICS.SANDY_CLAIMS_GEOCODED` -- claims geocoded via Overture Maps ZIP
-  centroids, with `LOCATION` (GEOGRAPHY point) and H3 cell IDs at res 7/8/9
-- `ANALYTICS.SANDY_EXPOSURE_H3_V2` -- claims aggregated into 354 H3 hexagons
-  at resolution 8, with per-hex `CLAIM_COUNT`, `TOTAL_DAMAGE`,
-  `AVG_FLOOD_DEPTH`, and a `BOUNDARY` column (GEOGRAPHY polygon)
-
-If you are adapting this for a different domain, the pattern that matters is:
-**a point-level fact table with a `GEOGRAPHY` column, aggregated into an H3
-grid, joined back to whatever record needs the zone-level context.** Swap
-claims/policies for deliveries/routes, incidents/facilities, or whatever your
-domain's point and zone data are.
-
-## Step 3b (optional): Load the sample Hurricane Sandy dataset
-
-Only needed if you want to run the demo with the exact same data used at
-SDSC. The source is FEMA's National Flood Insurance Program (NFIP) public
-claims and policy data, filtered to Hurricane Sandy / New York.
-
-1. Download the NFIP claims and policies extracts from FEMA's OpenFEMA API
-   (`https://www.fema.gov/openfema-data-page/fima-nfip-redacted-claims-v2`
-   and the corresponding policies dataset)
-2. Filter to the Sandy event window and New York geography
-3. Load into `RAW.NFIP_CLAIMS_SANDY` / `RAW.NFIP_POLICIES_SANDY_AREA` via
-   `COPY INTO` from a stage
-4. Build the `GEO` column: `UPDATE ... SET geo = ST_MAKEPOINT(longitude, latitude)`
-5. Build the H3 exposure aggregation and policy join described in Step 3a
-
-If you would rather bring your own dataset, skip this entirely -- just make
-sure your fact table has a `GEOGRAPHY` column (or lat/lon you can convert)
-and go straight to Step 3a's pattern.
+**Grain matters.** FEMA truncates public claim coordinates to about 11 km for
+privacy and recommends county or census-tract aggregation. Don't geocode
+individual claims to points or hexagons: that implies precision the source
+removed. If you adapt this for your own data, aggregate to the finest zone
+your data genuinely supports.
 
 ## Step 4 (required): Semantic view
 
-Define your business terms once. Minimal shape:
-
-```yaml
-name: my_exposure_view
-tables:
-  - name: policy_exposure
-    base_table:
-      database: MY_SPATIAL_DEMO
-      schema: ANALYTICS
-      table: POLICY_EXPOSURE
-    dimensions:
-      - name: risk_tier
-        expr: RISK_TIER
-      - name: occupancy_type
-        expr: OCCUPANCY_TYPE
-    facts:
-      - name: insured_value
-        expr: TOTAL_BUILDING_INSURANCE_COVERAGE + TOTAL_CONTENTS_INSURANCE_COVERAGE
-metrics:
-  - name: total_exposure
-    expr: SUM(insured_value)
-```
-
-Adapt the table names, dimensions, and metrics to your own schema. See
-Snowflake's semantic view documentation for the full spec.
+Define your business terms once. `go-further/ai-agent-reference.sql` has a
+working semantic view over `ANALYTICS.SANDY_COUNTY_CLAIMS`. It's created with
+the YAML procedure:
 
 ```sql
-CREATE OR REPLACE SEMANTIC VIEW MY_SPATIAL_DEMO.SEMANTIC.MY_EXPOSURE_VIEW
-  FROM SPECIFICATION $$ <paste your YAML here> $$;
+CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML('MY_SPATIAL_DEMO.SEMANTIC', $$
+name: MY_EXPOSURE_VIEW
+tables:
+  - name: county_claims
+    base_table: { database: MY_SPATIAL_DEMO, schema: ANALYTICS, table: SANDY_COUNTY_CLAIMS }
+    ...
+$$);
 ```
+
+Adapt the table names, dimensions, and facts to your own schema. See
+Snowflake's semantic view documentation for the full spec.
 
 ## Step 5 (required): Cortex Agent
 
@@ -226,10 +181,10 @@ the semantic view, or change the agent spec.
 2. Open CoWork, start a new chat, select the agent
 3. Ask a question that should hit the semantic view (e.g. "what is our total
    insured exposure?")
-4. If you added a `GEOGRAPHY` column, ask for a map (e.g. "show me the top
-   exposure hotspots as H3 hexagons")
+4. Ask for a county comparison (e.g. "compare claim volume with mean paid
+   amount by county")
 5. If you added CARTO, ask something that needs geocoding or isochrones
 
-If step 3-4 fail, check that the semantic view's table/column references
+If steps 3 or 4 fail, check that the semantic view's table/column references
 match your actual schema. If step 6 fails with an OAuth error, see the
 troubleshooting note above.

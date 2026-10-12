@@ -8,12 +8,10 @@ Agent, a scoped viewer role, and (optionally) the CARTO MCP connector.
 
 See [`sdsc-setup/skill.md`](sdsc-setup/skill.md) for the full walkthrough.
 
-**Required steps:** database foundation, your own analytical tables, semantic
-view, Cortex Agent, viewer role.
+**Required steps:** database foundation, free Marketplace data, county-level
+analytical views, semantic view, Cortex Agent, viewer role.
 
-**Optional steps:** Marketplace data (Overture Maps), loading the sample
-Hurricane Sandy NFIP dataset (bring your own dataset instead if you prefer),
-CARTO MCP connector registration.
+**Optional steps:** CARTO MCP connector registration.
 
 ### Installing in Cortex Code (CoCo)
 
