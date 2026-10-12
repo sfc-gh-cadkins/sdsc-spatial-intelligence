@@ -47,7 +47,7 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 | Bergen County | 2,072 | 1,913 | 0.0 |
 | Middlesex County | 742 | 694 | 17.0 |
 
-Manhattan is 10th with 668. Not included: **Ocean County** (37,459 records, the largest in the event) is 60.6 km away.
+Manhattan is 9th with 668. Not included: **Ocean County** (37,459 records, the largest in the event) is 60.6 km away.
 
 **After the change** (`distance_m = 75000`): 25 counties. Ocean County is #1 with 37,459, and Suffolk County (13,167, 34.8 km) is #3.
 
