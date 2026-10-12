@@ -233,10 +233,22 @@ current steps for connecting to Snowflake.
 
 *Needs AI features. On a trial, watch this one on screen.*
 
-1. Run [`go-further/ai-agent-reference.sql`](go-further/ai-agent-reference.sql).
-   It needs section 8 first. It creates a semantic view (business definitions,
-   such as what "mean paid" means) and an agent that uses it.
-2. Open **Snowflake CoWork** and choose `SDSC_FLOOD_RISK_AGENT`.
+1. Build the semantic view and agent. It needs section 8 first. Full
+   instructions, prerequisites, and troubleshooting are in
+   [`go-further/semantic-view-and-agent/`](go-further/semantic-view-and-agent/README.md).
+   Pick one:
+   - Paste the prompt in
+     [`COCO_PROMPT.md`](go-further/semantic-view-and-agent/COCO_PROMPT.md)
+     into Cortex Code, or
+   - Run [`create-semantic-view-and-agent.sql`](go-further/semantic-view-and-agent/create-semantic-view-and-agent.sql), or
+   - Upload [`sdsc_insurance.yaml`](go-further/semantic-view-and-agent/sdsc_insurance.yaml)
+     in Snowsight.
+
+   The semantic view holds the business definitions, such as what "mean
+   paid" means and how to total counties. The agent uses it to write SQL.
+2. Open **Snowflake CoWork** ([ai.snowflake.com](https://ai.snowflake.com))
+   and choose `SDSC_FLOOD_RISK_AGENT`. If it isn't listed, see the
+   troubleshooting table in that folder's README.
 3. Ask: *"For counties with at least 500 claims, compare claim volume with
    mean paid amount. Show counts, missing payments, and the query. Explain
    what changed and why this doesn't establish future property risk."*

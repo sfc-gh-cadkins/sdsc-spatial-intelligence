@@ -6,8 +6,10 @@ For the step-by-step path through every workshop section, see
 
 ## Files
 
-- [`ai-agent-reference.sql`](ai-agent-reference.sql): the semantic view and
-  Cortex Agent used in the CoWork section. It builds on the views from
+- [`semantic-view-and-agent/`](semantic-view-and-agent/README.md): the
+  semantic view and Cortex Agent used in the CoWork section. It has a Cortex
+  Code prompt, a one-shot SQL script, the semantic view YAML, prerequisites,
+  troubleshooting, and a no-AI fallback. It builds on the views from
   [`../labs/04_build_the_pipeline.sql`](../labs/04_build_the_pipeline.sql),
   so run that first. Needs AI features, which self-service trials disable by
   default until a payment method is added.

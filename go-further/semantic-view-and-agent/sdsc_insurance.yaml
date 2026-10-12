@@ -1,0 +1,102 @@
+# Semantic view: SDSC_INSURANCE
+#
+# Business definitions over SDSC_WORKSHOP.ANALYTICS.SANDY_COUNTY_CLAIMS
+# (created by labs/04_build_the_pipeline.sql). The flood risk agent reads this
+# file's definitions to turn a plain-English question into SQL.
+#
+# Grain: one row per county in NY and NJ. FEMA truncates claim coordinates to
+# about 11 km, so nothing here places an individual claim on a map.
+#
+# Ways to use this file (details in README.md next to it):
+#   - Snowsight: Workspaces > Add new > Semantic View, then choose the
+#     option to upload a YAML specification
+#   - SQL: create-semantic-view-and-agent.sql pastes this same YAML into
+#     SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML
+#
+# If you built the pipeline under a different database name, change
+# base_table.database below.
+
+name: SDSC_INSURANCE
+description: Hurricane Sandy NFIP claims by county, NY and NJ.
+
+tables:
+  - name: county_claims
+    description: >-
+      One row per county in New York and New Jersey, with Hurricane Sandy
+      NFIP claim totals. Counties with no Sandy claims are included with
+      zero claims.
+    base_table:
+      database: SDSC_WORKSHOP
+      schema: ANALYTICS
+      table: SANDY_COUNTY_CLAIMS
+    primary_key:
+      columns: [county_geo_id]
+
+    dimensions:
+      - name: county_geo_id
+        expr: COUNTY_GEO_ID
+        data_type: VARCHAR
+        description: County identifier, for example geoId/36061 for Manhattan.
+      - name: county
+        expr: COUNTY
+        data_type: VARCHAR
+        synonyms: [county name, borough]
+        description: >-
+          County name. New York County appears as Manhattan, Kings County as
+          Brooklyn.
+      - name: state
+        expr: STATE
+        data_type: VARCHAR
+        synonyms: [state code]
+        description: NY or NJ.
+
+    # Facts are per-county values. Use them for per-county questions.
+    facts:
+      - name: claim_records
+        expr: CLAIM_RECORDS
+        data_type: NUMBER
+        synonyms: [claims, claim count, number of claims]
+        description: Number of Sandy claim records in the county.
+      - name: paid_denominator
+        expr: PAID_DENOMINATOR
+        data_type: NUMBER
+        synonyms: [claims with payment, paid claims]
+        description: >-
+          Claim records with a building payment recorded. Use this as the
+          denominator for mean paid.
+      - name: bldg_paid_usd
+        expr: BLDG_PAID_USD
+        data_type: NUMBER
+        synonyms: [building paid, total paid]
+        description: Total building payments in USD.
+      - name: mean_bldg_paid_usd
+        expr: MEAN_BLDG_PAID_USD
+        data_type: NUMBER
+        synonyms: [mean paid, average payout, average building payment]
+        description: >-
+          Mean building payment per claim with a payment recorded, in USD,
+          for one county. Do not average this across counties; use the
+          mean_paid_usd metric for any rollup.
+
+    # Metrics are for rollups across counties (by state, or all of NY and NJ).
+    metrics:
+      - name: total_claims
+        expr: SUM(county_claims.claim_records)
+        description: Total Sandy claim records across the selected counties.
+      - name: total_claims_with_payment
+        expr: SUM(county_claims.paid_denominator)
+        description: Claim records with a building payment recorded.
+      - name: total_claims_without_payment
+        expr: SUM(county_claims.claim_records - county_claims.paid_denominator)
+        synonyms: [missing payments, claims with no payment]
+        description: Claim records with no building payment recorded (missingness).
+      - name: total_bldg_paid_usd
+        expr: SUM(county_claims.bldg_paid_usd)
+        description: Total building payments in USD across the selected counties.
+      - name: mean_paid_usd
+        expr: SUM(county_claims.bldg_paid_usd) / NULLIF(SUM(county_claims.paid_denominator), 0)
+        synonyms: [rollup mean paid, statewide mean paid]
+        description: >-
+          Mean building payment per claim with a payment recorded, weighted
+          correctly across counties. Use this for state or multi-county
+          averages.

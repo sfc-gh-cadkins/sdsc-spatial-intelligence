@@ -46,7 +46,7 @@ FEMA truncates public NFIP claim coordinates to one decimal place (about 11 km) 
 
 ## Go further
 
-[`go-further/`](go-further/) has more to explore after the labs: the workshop slide decks, the semantic view and agent for the CoWork section (it needs AI features, which trial accounts unlock when a card is added), and a CoCo skill that recreates a demo environment in your own account. None of it is required for the labs.
+[`go-further/`](go-further/) has more to explore after the labs: the workshop slide decks, the [semantic view and agent](go-further/semantic-view-and-agent/README.md) for the CoWork section, with a Cortex Code prompt, SQL, and YAML (it needs AI features, which trial accounts unlock when a card is added), and a CoCo skill that recreates a demo environment in your own account. None of it is required for the labs.
 
 ## License / attribution
 
