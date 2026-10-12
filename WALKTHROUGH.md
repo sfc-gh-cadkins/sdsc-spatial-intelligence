@@ -152,15 +152,15 @@ times in Query History.
    business language, including the county-level caveat.
 3. Ask: *"Change the distance so Ocean County is included."* Run it. Ocean
    should be #1, matching your own change.
-4. Ask: *"Convert this script to Snowpark Python."* Compare the result with
-   [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py).
+4. Paste **CoCo prompt 1** from the end of the SQL file (SQL to Python). Compare the result with
+   [`labs/reference/02_sandy_spatial.py`](labs/reference/02_sandy_spatial.py).
 
 **The habit:** AI made the change, and you checked it against a result you
 already knew.
 
 ## 6. The same lab in Python
 
-Open [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py) in a Workspace
+Open [`labs/reference/02_sandy_spatial.py`](labs/reference/02_sandy_spatial.py) in a Workspace
 (**+ > Python file**, paste, run). Same three steps, same knobs, same numbers,
 written with Snowpark DataFrames. Every `ST_*` function still runs inside
 Snowflake; Python only builds the query.
@@ -169,7 +169,8 @@ Snowflake; Python only builds the query.
 
 ## 7. The same lab as a notebook, with maps
 
-Upload [`labs/03_sandy_spatial.ipynb`](labs/03_sandy_spatial.ipynb) to a
+Paste **CoCo prompt 2** from the end of the SQL file, or use the finished version:
+Upload [`labs/reference/03_sandy_spatial.ipynb`](labs/reference/03_sandy_spatial.ipynb) to a
 Workspace and **Run all**. Same SQL, plus what a worksheet can't do:
 
 - **Step 1:** a ZIP map of Manhattan, coloured by Sandy claims.

@@ -30,9 +30,7 @@ workshop in order: what to click, what to run, and what you should see.
 | File | Time | What it does |
 |---|---|---|
 | [`labs/00_setup_and_check.sql`](labs/00_setup_and_check.sql) | 2 min | Creates one X-Small auto-suspending warehouse, then runs a read-only check that every row returns OK |
-| [`labs/01_sandy_spatial.sql`](labs/01_sandy_spatial.sql) | 8 min | **The lab, in SQL.** One script, three steps: Manhattan ZIPs as real shapes (types), counties near Manhattan ranked by count vs mean payout (functions), and the flood-zone surprise |
-| [`labs/02_sandy_spatial.py`](labs/02_sandy_spatial.py) | 2 min | **The same lab, in Snowpark Python.** Same steps, same numbers |
-| [`labs/03_sandy_spatial.ipynb`](labs/03_sandy_spatial.ipynb) | 5 min | **The same lab, as a notebook.** Adds ZIP and county maps, a rank-flip chart, a live slider, and a Python loop over distances |
+| [`labs/01_sandy_spatial.sql`](labs/01_sandy_spatial.sql) | 10 min | **The lab.** One SQL script, three steps: Manhattan ZIPs as real shapes (types), counties near Manhattan ranked by count vs mean payout (functions), and the flood-zone surprise. Ends with two CoCo prompts: SQL to Python, and SQL to a notebook with visuals. Finished versions: [`labs/reference/`](labs/reference/) |
 | [`labs/04_build_the_pipeline.sql`](labs/04_build_the_pipeline.sql) | 3 min | Turns the lab into two views, the layer a map tool or AI agent reads |
 | [`labs/99_cleanup.sql`](labs/99_cleanup.sql) | 1 min | Optional. Drops only what the workshop created |
 

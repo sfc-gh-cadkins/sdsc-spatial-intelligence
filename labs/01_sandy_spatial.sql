@@ -8,8 +8,8 @@
 --                      by claim COUNT and by MEAN building payout.
 --   Step 3  Surprise   Were these properties even in the flood zone?
 --
--- The same script exists in Python (02_sandy_spatial.py) and as a notebook
--- with maps and charts (03_sandy_spatial.ipynb).
+-- At the end of this file are two Cortex Code (CoCo) prompts: one turns this
+-- script into a Python file, the other into a notebook with visuals.
 --
 -- Data: real FEMA NFIP claims plus real ZIP and county boundaries, all from
 -- the free "Snowflake Public Data (Free)" Marketplace listing.
@@ -183,3 +183,41 @@ LIMIT 10;
 --   zone, and were paid MORE on average ($265,319 vs $227,798).
 -- Interpret: the flood map said these places were lower risk. The water
 -- disagreed. That's why underwriting needs geography.
+
+-- =============================================================================
+-- Take it further with Cortex Code (CoCo)
+-- =============================================================================
+-- Open CoCo in Snowsight (needs AI features; on a trial, watch on screen).
+-- Copy everything between the dashed lines into CoCo.
+-- If CoCo isn't available, the finished versions are in labs/reference/.
+
+-- ---- CoCo prompt 1 · SQL to Python -----------------------------------------
+-- Convert labs/01_sandy_spatial.sql into a Snowpark Python file named
+-- 02_sandy_spatial.py. Keep the same three steps and the same three knobs
+-- (WITHIN_M, DISTANCE_M, MIN_CLAIMS) at the top. Use get_active_session(),
+-- Snowpark DataFrames and snowflake.snowpark.functions, and call the spatial
+-- functions (TO_GEOGRAPHY, TRY_TO_GEOGRAPHY, ST_CENTROID, ST_AREA, ST_DISTANCE,
+-- ST_DWITHIN) with F.call_function so they still run inside Snowflake. Show
+-- each step's result with .show(). Then run it and confirm the numbers match
+-- the SQL: East Village 10009 is the top ZIP with 94 claims, and Manhattan is
+-- #9 by count but #1 by mean paid ($236,483).
+-- ----------------------------------------------------------------------------
+
+-- ---- CoCo prompt 2 · SQL to a notebook with visuals -------------------------
+-- Turn labs/01_sandy_spatial.sql into a Snowflake Workspace notebook named
+-- 03_sandy_spatial.ipynb that tells the same story with great visuals. Keep
+-- the SQL as SQL cells, put the three knobs in one Parameters cell at the top,
+-- and use markdown between steps to explain what each chart shows. Use Altair
+-- and render the shapes with ST_ASGEOJSON (simplify county boundaries with
+-- ST_SIMPLIFY so they draw fast). Include:
+--   1. A map of Manhattan ZIP codes coloured by Sandy claims, with tooltips.
+--   2. Two county maps side by side: claim count vs mean building paid.
+--   3. A slope chart showing each county's rank by count vs rank by mean paid.
+--   4. A slider that filters counties by minimum claims and re-ranks them by
+--      mean paid in the browser, without rerunning SQL.
+--   5. A Python loop that reruns the Step 2 spatial query at 0 to 80 km from
+--      Manhattan and charts claims captured and the #1 county at each distance.
+--   6. Inside vs outside FEMA's high-risk flood zone for the top 10 ZIPs, as
+--      stacked bars next to a map of percent outside.
+-- Use a consistent palette, clear titles, and run every cell to check it works.
+-- ----------------------------------------------------------------------------

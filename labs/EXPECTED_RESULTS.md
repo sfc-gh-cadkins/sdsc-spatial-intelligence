@@ -13,9 +13,9 @@ of a few rows is expected; a difference of thousands means a filter changed.
 | County boundaries readable | OK | 1 |
 | Native GEOGRAPHY works | OK | NULL |
 
-## The lab (`01_sandy_spatial.sql`, `.py`, `.ipynb`)
+## The lab (`01_sandy_spatial.sql`)
 
-All three versions return the same numbers.
+The CoCo-generated Python and notebook versions (and `labs/reference/`) should return the same numbers.
 
 ### Step 1 · Manhattan by ZIP code
 
