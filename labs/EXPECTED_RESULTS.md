@@ -32,6 +32,23 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 
 **After the change** (`within_m = 6000`): 10009, 10013, 10011, 10014 and 10010 also turn TRUE. 10029, 10128 and 10035 stay FALSE.
 
+### Lab A, second query: the flood-zone surprise
+
+| ZIP | CLAIMS | OUTSIDE_HIGH_RISK_ZONE | PCT_OUTSIDE |
+|---|---|---|---|
+| 10009 | 94 | 31 | 33 |
+| 10013 | 80 | 8 | 10 |
+| 10038 | 74 | 6 | 8 |
+| 10011 | 62 | 20 | 32 |
+| 10029 | 58 | 29 | 50 |
+| 10014 | 42 | 10 | 24 |
+| 10004 | 29 | 7 | 24 |
+| 10128 | 27 | 1 | 4 |
+| 10010 | 24 | 5 | 21 |
+| 10035 | 23 | 5 | 22 |
+
+All of Manhattan: 188 of 668 Sandy claims (28%) came from policies rated outside FEMA's high-risk ("Special Flood") zone. Mean building paid: $265,319 outside vs $227,798 inside.
+
 ## Lab B · Counties near Manhattan (`distance_m = 25000`)
 
 15 counties returned. Top 8:

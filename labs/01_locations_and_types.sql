@@ -83,3 +83,41 @@ LIMIT 10;
 -- Your change: set within_m to 6000 and rerun. Five more ZIPs turn TRUE:
 -- 10009, 10013, 10011, 10014 and 10010. 10029, 10128 and 10035 stay FALSE,
 -- so distance from the tip does not explain where Manhattan flooded.
+
+-- =============================================================================
+-- The surprise: were these properties even in the flood zone?
+-- =============================================================================
+-- POLICY_RATED_FLOOD_ZONE is the FEMA zone each policy was rated in at the time
+-- of the loss. "Special Flood..." is FEMA's high-risk zone (A and V zones).
+-- Everything else is outside it.
+
+SELECT REPLACE(zip_geo_id, 'zip/', '')                              AS zip,
+       COUNT(*)                                                     AS claims,
+       COUNT_IF(NOT policy_rated_flood_zone ILIKE 'Special Flood%') AS outside_high_risk_zone,
+       ROUND(100 * outside_high_risk_zone / claims)                 AS pct_outside
+FROM IDENTIFIER($claims_tbl)
+WHERE flood_event = 'Hurricane Sandy'
+  AND county_geo_id = 'geoId/36061'
+GROUP BY zip_geo_id
+ORDER BY claims DESC
+LIMIT 10;
+
+-- Expected (snapshot 2026-10-12). 10 rows, in this order:
+--
+--   ZIP   | CLAIMS | OUTSIDE_HIGH_RISK_ZONE | PCT_OUTSIDE
+--   10009 |     94 |                     31 |          33
+--   10013 |     80 |                      8 |          10
+--   10038 |     74 |                      6 |           8
+--   10011 |     62 |                     20 |          32
+--   10029 |     58 |                     29 |          50
+--   10014 |     42 |                     10 |          24
+--   10004 |     29 |                      7 |          24
+--   10128 |     27 |                      1 |           4
+--   10010 |     24 |                      5 |          21
+--   10035 |     23 |                      5 |          22
+--
+-- Interpret: half of East Harlem's Sandy claims, and a third of the East
+-- Village's, came from properties FEMA had rated OUTSIDE the high-risk flood
+-- zone. Across all of Manhattan it's 188 of 668 claims (28%), and those
+-- claims were paid more on average ($265,319 vs $227,798).
+-- The flood map said these places were lower risk. The water disagreed.
