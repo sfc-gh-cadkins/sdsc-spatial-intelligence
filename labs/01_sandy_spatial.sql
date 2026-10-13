@@ -62,6 +62,13 @@ southern_tip AS (
   SELECT ST_CENTROID(geog) AS pt FROM zip_shapes WHERE geo_id = 'zip/10004'
 )
 SELECT REPLACE(c.zip_geo_id, 'zip/', '')                          AS zip,
+       DECODE(zip, '10009','East Village', '10013','Tribeca / SoHo',
+                   '10038','Seaport', '10011','Chelsea', '10029','East Harlem',
+                   '10014','West Village', '10004','Battery Park',
+                   '10128','Upper East Side', '10010','Gramercy',
+                   '10035','East Harlem (north)', '10002','Lower East Side',
+                   '10282','Battery Park City', '10280','Battery Park City',
+                   '10003','East Village / Union Sq', 'Other')    AS neighborhood,
        c.claims,
        c.mean_bldg_paid,
        ROUND(ST_AREA(z.geog) / 1e6, 2)                             AS area_km2,
@@ -166,6 +173,11 @@ ORDER BY rank_by_count;
 -- time of the loss. "Special Flood..." is FEMA's high-risk zone (A and V).
 
 SELECT REPLACE(zip_geo_id, 'zip/', '')                              AS zip,
+       DECODE(zip, '10009','East Village', '10013','Tribeca / SoHo',
+                   '10038','Seaport', '10011','Chelsea', '10029','East Harlem',
+                   '10014','West Village', '10004','Battery Park',
+                   '10128','Upper East Side', '10010','Gramercy',
+                   '10035','East Harlem (north)', 'Other')            AS neighborhood,
        COUNT(*)                                                     AS claims,
        COUNT_IF(NOT policy_rated_flood_zone ILIKE 'Special Flood%') AS outside_high_risk_zone,
        ROUND(100 * outside_high_risk_zone / claims)                 AS pct_outside
@@ -177,10 +189,13 @@ ORDER BY claims DESC
 LIMIT 10;
 
 -- Expected (snapshot 2026-10-12):
---   10009 East Village 94 claims, 31 outside (33%)
---   10029 East Harlem  58 claims, 29 outside (50%)
+--   10013 Tribeca / SoHo 80 claims,  8 outside (10%)  waterfront: map got it right
+--   10038 Seaport        74 claims,  6 outside  (8%)
+--   10009 East Village   94 claims, 31 outside (33%)
+--   10011 Chelsea        62 claims, 20 outside (32%)
+--   10029 East Harlem    58 claims, 29 outside (50%)
 --   All of Manhattan: 188 of 668 claims (28%) came from outside the high-risk
---   zone, and were paid MORE on average ($265,319 vs $227,798).
+--   zone. More than one in four.
 -- Interpret: the flood map said these places were lower risk. The water
 -- disagreed. That's why underwriting needs geography.
 
