@@ -130,6 +130,6 @@ Step 6. Wrap up:
 - **It adds BOUNDARY or H3 columns.** Tell it to leave geometry out.
 - **It skips the dry run.** Ask it to validate with the `TRUE` flag first.
 - **It can't find the source view.** Check that you're using the role you
-  ran Lab 04 with. CoCo uses your current role.
+  ran `04_build_the_pipeline.sql` with. CoCo uses your current role.
 - **It gets stuck on anything.** Run `create-semantic-view-and-agent.sql`
   instead. It builds the same objects.

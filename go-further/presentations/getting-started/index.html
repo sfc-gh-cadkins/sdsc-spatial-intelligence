@@ -39,9 +39,9 @@
     <h2>What you need</h2>
     <div class="checklist">
       <li><span class="check-box"></span><span class="check-text">A Snowflake account with ACCOUNTADMIN access (or a role that can create databases, warehouses, and integrations)</span></li>
-      <li><span class="check-box"></span><span class="check-text">Access to the Snowflake Marketplace (for Overture Maps, or bring your own geospatial dataset)</span></li>
+      <li><span class="check-box"></span><span class="check-text">Access to the Snowflake Marketplace, for the free Snowflake Public Data (Free) listing</span></li>
       <li><span class="check-box"></span><span class="check-text">A CARTO account and workspace, if you want the CARTO MCP step (optional)</span></li>
-      <li><span class="check-box"></span><span class="check-text">The <code>skills/sdsc-setup</code> skill from this repo, or the manual SQL below</span></li>
+      <li><span class="check-box"></span><span class="check-text">The <code>go-further/skills/sdsc-setup</code> skill from this repo, or the SQL files it points to</span></li>
     </div>
   </section>
 
@@ -61,8 +61,8 @@
   <section class="slide theme-snowflake">
     <div class="eyebrow">Step 2 &middot; Snowflake Marketplace</div>
     <h2>Bring in open geospatial data</h2>
-    <p class="lead">Search the Marketplace for Overture Maps (places, divisions, buildings, transportation). Import as a share - no ETL, queryable immediately alongside your own data.</p>
-    <p class="disclaimer">Optional: skip this step entirely and use only your own data. The semantic view and agent do not require Marketplace data to function.</p>
+    <p class="lead">Get Snowflake Public Data (Free) from the Marketplace: FEMA NFIP flood claims plus county and ZIP boundaries. It arrives as a share - no ETL, queryable immediately alongside your own data.</p>
+    <p class="disclaimer">Adapting this to your own data? Point the views and semantic view at your tables instead.</p>
   </section>
 
   <section class="slide theme-snowflake">
@@ -84,15 +84,15 @@
   <section class="slide theme-snowflake">
     <div class="eyebrow">Step 4 &middot; Snowflake</div>
     <h2>Create a Cortex Agent</h2>
-    <p class="lead">Define an agent spec that references your semantic view, sets the orchestration model, and specifies the warehouse. The entire spec is JSON - version-controllable, no custom app required.</p>
+    <p class="lead">Define an agent spec that references your semantic view, sets the orchestration model, and specifies the warehouse. The spec is plain text (YAML) - version-controllable, no custom app required.</p>
   </section>
 
   <section class="slide theme-carto">
     <div class="eyebrow">Step 5 &middot; CARTO (optional)</div>
     <h2>Register the CARTO MCP connector</h2>
-    <p class="lead">Create a confidential SPA OAuth client in CARTO, register Snowflake's callback URL, then create the API integration and external MCP server in Snowflake. Attach the MCP server to your agent.</p>
+    <p class="lead">Create an SPA OAuth client in CARTO, register Snowflake's callback URL, then create the API integration and external MCP server in Snowflake. Attach the MCP server to your agent.</p>
     <div class="checklist">
-      <li><span class="check-box"></span><span class="check-text">CARTO: create a confidential SPA OAuth Client, with a Client Secret</span></li>
+      <li><span class="check-box"></span><span class="check-text">CARTO: create an SPA OAuth Client and copy its Client ID and Client Secret</span></li>
       <li><span class="check-box"></span><span class="check-text">CARTO: register the callback URL <code>https://identity.snowflake.com/oauth2/callback</code></span></li>
       <li><span class="check-box"></span><span class="check-text">Snowflake: create the API integration with the real Client ID and Secret (not the client's display name)</span></li>
       <li><span class="check-box"></span><span class="check-text">Snowflake: create the external MCP server, then attach it to your agent</span></li>
@@ -106,9 +106,9 @@
   </section>
 
   <section class="slide hero">
-    <div class="eyebrow">Everything above, automated</div>
-    <h2>Run the skill instead</h2>
-    <p class="lead"><code>skills/sdsc-setup</code> in this repo automates every required step above. Sample data loading (Hurricane Sandy NFIP claims) is included as an optional step - skip it and point the semantic view at your own dataset if you prefer.</p>
+    <div class="eyebrow">Everything above, step by step</div>
+    <h2>Follow the skill</h2>
+    <p class="lead"><code>go-further/skills/sdsc-setup</code> in this repo walks through every step above with the exact SQL files to run. Use it with Cortex Code, or read it and run the SQL yourself.</p>
     <div class="ruling-cta">
       <a href="https://github.com/sfc-gh-cadkins/sdsc-spatial-intelligence/tree/main/go-further/skills/sdsc-setup" target="_blank" rel="noopener">See the skill on GitHub &rarr;</a>
     </div>

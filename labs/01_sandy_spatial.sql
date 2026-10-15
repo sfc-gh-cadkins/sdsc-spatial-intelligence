@@ -80,7 +80,7 @@ CROSS JOIN southern_tip t
 ORDER BY c.claims DESC
 LIMIT 10;
 
--- Expected (snapshot 2026-10-11; the listing refreshes, so expect small drift):
+-- Expected (snapshot October 2026; the listing refreshes, so expect small drift):
 --   ZIP   | CLAIMS | MEAN_BLDG_PAID | KM_FROM_SOUTHERN_TIP | NEAR (3 km)
 --   10009 |     94 |         128165 |                  4.9 | FALSE  East Village
 --   10013 |     80 |         242294 |                  3.1 | FALSE  Tribeca/SoHo
@@ -145,7 +145,7 @@ FROM nearby n
 JOIN IDENTIFIER($geo_index) g ON g.geo_id = n.county_geo_id
 ORDER BY rank_by_count;
 
--- Expected (distance_m = 25000, min_claims = 500, snapshot 2026-10-12). 10 rows:
+-- Expected (distance_m = 25000, min_claims = 500, snapshot October 2026). 10 rows:
 --   COUNTY           | CLAIMS | MISSING | MEAN_PAID | KM   | BY_COUNT | BY_MEAN
 --   Nassau County    |  26964 |    1086 |     67115 | 11.3 |        1 |       6
 --   Monmouth County  |  10032 |     607 |     74362 | 18.2 |        2 |       4
@@ -188,10 +188,10 @@ GROUP BY zip_geo_id
 ORDER BY claims DESC
 LIMIT 10;
 
--- Expected (snapshot 2026-10-12):
+-- Expected (snapshot October 2026):
+--   10009 East Village   94 claims, 31 outside (33%)
 --   10013 Tribeca / SoHo 80 claims,  8 outside (10%)  waterfront: map got it right
 --   10038 Seaport        74 claims,  6 outside  (8%)
---   10009 East Village   94 claims, 31 outside (33%)
 --   10011 Chelsea        62 claims, 20 outside (32%)
 --   10029 East Harlem    58 claims, 29 outside (50%)
 --   All of Manhattan: 188 of 668 claims (28%) came from outside the high-risk
