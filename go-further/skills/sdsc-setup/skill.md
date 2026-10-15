@@ -111,8 +111,15 @@ CREATE EXTERNAL MCP SERVER SDSC_WORKSHOP.PUBLIC.CARTO_MCP
   API_INTEGRATION = CARTO_MCP_OAUTH2;
 ```
 
-CARTO's **Workflow API & MCP Server** page shows the full MCP URL, including
-`<region>` and `<your_account_id>`.
+CARTO's **Settings > CARTO MCP Server** page shows the full MCP URL, including
+`<region>` and `<your_account_id>`. The account ID matches the Organization ID
+under **Settings > General**. Use the copy button rather than retyping it: IDs
+mix look-alike characters such as `i` and `l`, and a wrong ID still connects
+but points at the wrong organization.
+
+To change the OAuth client later, use `ALTER API INTEGRATION CARTO_MCP_OAUTH2
+SET API_USER_AUTHENTICATION = (...)`. `CREATE OR REPLACE` is not supported for
+`external_mcp` integrations.
 
 4. In Snowsight, open your agent, go to **MCP Connectors**, add the CARTO
    MCP server, and complete the OAuth consent flow
@@ -120,6 +127,14 @@ CARTO's **Workflow API & MCP Server** page shows the full MCP URL, including
 **Common failure:** `invalid_request: Unknown client` means the Client ID
 field was filled with the client's display name instead of its actual
 Client ID. Double-check you copied the ID, not the name.
+
+**Connected but no tools, or wrong data:** check the MCP URL's account ID
+against your CARTO Organization ID. If you're in more than one CARTO org,
+confirm the agent is pointing at the shared workshop org.
+
+**No CARTO login prompt after reconnecting:** Snowflake keeps your CARTO
+token per user, so a disconnect and reconnect can quietly reuse it. That is
+expected. To force a fresh sign-in, attach a new MCP server object instead.
 
 ## Step 7 (required): Viewer role
 
