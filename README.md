@@ -11,7 +11,7 @@ presented by Snowflake and CARTO.
 | Pillar | What you'll see | Where |
 |---|---|---|
 | **1. Native spatial types** | `GEOGRAPHY` (spherical, WGS84, metres) and `GEOMETRY` (planar, CRS-defined units) | The lab, Step 1 |
-| **2. Native spatial functions** | `ST_DWITHIN`, `ST_DISTANCE`, `ST_AREA`, `ST_CENTROID` | Labs A + B |
+| **2. Native spatial functions** | `ST_DWITHIN`, `ST_DISTANCE`, `ST_AREA`, `ST_CENTROID` | The lab, Steps 1 and 2 |
 | **3. Ecosystem of data and capabilities** | Free Marketplace data (FEMA NFIP + county boundaries), and CARTO for interactive exploration | Marketplace tour, the lab, CARTO section |
 | **4. AI across the workflow** | CoCo explains or edits a query, CoWork answers a question with an inspectable query | AI sections of the walkthrough |
 
@@ -25,7 +25,7 @@ workshop in order: what to click, what to run, and what you should see.
 1. **Create a trial:** <https://signup.snowflake.com/>
 2. **Get the free data:** open *Snowflake Public Data (Free)* at
    <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255> and click **Get**.
-3. **Open a SQL worksheet** in Snowsight. Paste and run each file in order:
+3. **Open Workspaces** in Snowsight (Projects > Workspaces), create a SQL file, and paste and run each file in order. The Python and notebook versions of the lab are covered in the walkthrough:
 
 | File | Time | What it does |
 |---|---|---|

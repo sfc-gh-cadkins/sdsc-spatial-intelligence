@@ -24,7 +24,7 @@ clone.
 
 > **About AI features:** Snowflake documentation says AI features are disabled
 > by default in self-service trials until a payment method is added. Sections
-> 6 and 10 need them. Everything else is plain SQL. You don't need to add
+> 5 and 10 need them. Everything else is plain SQL. You don't need to add
 > payment details for this workshop: watch those two sections on screen.
 
 Compare every result with [`labs/EXPECTED_RESULTS.md`](labs/EXPECTED_RESULTS.md).
@@ -209,7 +209,7 @@ Suffolk, Atlantic and Cape May.
 Then:
 
 1. Open `SDSC_WORKSHOP.ANALYTICS.SANDY_COUNTY_CLAIMS` in the **Catalog** and
-   look at **Definition**: Labs B and C, made permanent.
+   look at **Definition**: Steps 2 and 3 of the lab, made permanent.
 2. Click **Lineage**. Upstream is the FEMA share, and downstream is anything
    that reads the view.
 
@@ -272,7 +272,7 @@ current steps for connecting to Snowflake.
 
 Run [`labs/99_cleanup.sql`](labs/99_cleanup.sql). It drops only what this
 workshop created: the `SDSC_WORKSHOP` database (if you ran section 8 or 10)
-and the `SDSC_WORKSHOP_WH` warehouse. It doesn't touch the Marketplace
+and the `SDSC_WORKSHOP_WH` and `SDSC_WORKSHOP_WH_LARGE` warehouses. It doesn't touch the Marketplace
 listing.
 
 ---

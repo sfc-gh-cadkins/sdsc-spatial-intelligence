@@ -15,7 +15,7 @@ The listing describes a refresh lag. This repo **does not copy or redistribute**
 
 ## Event filter
 
-The labs filter on `FLOOD_EVENT = 'Hurricane Sandy'`, the event label in the source. Running the readiness check on 2026-10-09 returned 144,848 records across 13 states, with dates of loss from 2012-10-27 to 2012-11-06. The labs narrow that to New York (`geoId/36`) and New Jersey (`geoId/34`).
+The labs filter on `FLOOD_EVENT = 'Hurricane Sandy'`, the event label in the source. Running the readiness check in October 2026 returned 144,848 records across 13 states, with dates of loss from 2012-10-27 to 2012-11-06. The labs narrow that to New York (`geoId/36`) and New Jersey (`geoId/34`).
 
 ## The coordinate-precision caveat
 

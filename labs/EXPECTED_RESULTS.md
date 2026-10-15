@@ -1,6 +1,6 @@
 # Expected results
 
-Snapshot captured **2026-10-09** against *Snowflake Public Data (Free)*
+Snapshot captured **October 2026** against *Snowflake Public Data (Free)*
 (`SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE`). The free listing is refreshed
 by the provider, so later runs can drift by a handful of records. A difference
 of a few rows is expected; a difference of thousands means a filter changed.
@@ -29,10 +29,10 @@ Real FEMA claims and real ZIP boundaries. Top 10 ZIPs by claims, `within_m = 300
 | 10011 | Chelsea | 62 | 239,722 | 1.67 | 5.5 | FALSE |
 | 10029 | East Harlem | 58 | 109,056 | 3.03 | 12.5 | FALSE |
 | 10014 | West Village | 42 | 445,064 | 1.25 | 4.6 | FALSE |
-| 10004 | Battery Park / FiDi | 29 | 433,761 | 1.18 | 0.0 | TRUE |
+| 10004 | Battery Park | 29 | 433,761 | 1.18 | 0.0 | TRUE |
 | 10128 | Upper East Side | 27 | 99,119 | 1.17 | 11.3 | FALSE |
 | 10010 | Gramercy | 24 | 209,605 | 0.95 | 5.8 | FALSE |
-| 10035 | East Harlem | 23 | 113,958 | 3.63 | 13.5 | FALSE |
+| 10035 | East Harlem (north) | 23 | 113,958 | 3.63 | 13.5 | FALSE |
 
 **After the change** (`within_m = 6000`): 10009, 10013, 10011, 10014 and 10010 also turn TRUE. 10029, 10128 and 10035 stay FALSE.
 

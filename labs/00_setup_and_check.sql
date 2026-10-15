@@ -53,7 +53,7 @@ SELECT 'Native GEOGRAPHY works',
            'OK', 'UNEXPECTED'),
        NULL;
 
--- Expected (snapshot 2026-10-09; the free listing refreshes, so counts can drift):
+-- Expected (snapshot October 2026; the free listing refreshes, so counts can drift):
 --   NFIP claims table readable | OK | ~144,848
 --   County boundaries readable | OK | 1
 --   Native GEOGRAPHY works     | OK | NULL

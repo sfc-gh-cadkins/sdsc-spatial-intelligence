@@ -3,7 +3,7 @@
 -- =============================================================================
 -- Question: how does a one-off query become something a team can use every day?
 --
--- This file turns Labs B and C into two permanent views in your own account:
+-- This file turns Steps 2 and 3 of the lab into two permanent views in your own account:
 --   RAW.NFIP_CLAIMS_SANDY_NYNJ       the Sandy claims for NY and NJ (a filter)
 --   ANALYTICS.SANDY_COUNTY_CLAIMS    claims by county, with county boundaries
 --
@@ -31,7 +31,7 @@ FROM SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE.FEMA_NATIONAL_FLOOD_INSURANCE_P
 WHERE flood_event = 'Hurricane Sandy'
   AND state_geo_id IN ('geoId/36', 'geoId/34');
 
--- Layer 2: Labs B and C made permanent. One row per county, with its boundary.
+-- Layer 2: Steps 2 and 3 made permanent. One row per county, with its boundary.
 CREATE OR REPLACE VIEW SDSC_WORKSHOP.ANALYTICS.SANDY_COUNTY_CLAIMS
   COMMENT = 'Hurricane Sandy NFIP claims by county (NY and NJ) with simplified boundaries.'
 AS

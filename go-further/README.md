@@ -1,6 +1,6 @@
 # Go further
 
-Optional material for after the labs. None of it is needed for Labs A to C.
+Optional material for after the labs. None of it is needed for the lab.
 For the step-by-step path through every workshop section, see
 [`../WALKTHROUGH.md`](../WALKTHROUGH.md).
 

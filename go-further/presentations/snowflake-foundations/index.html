@@ -96,7 +96,7 @@
   <section class="slide">
     <div class="eyebrow">Component &middot; open data, zero ETL</div>
     <h2>Snowflake Marketplace</h2>
-    <p class="lead">Third-party geospatial data - like Overture Maps places, buildings, divisions, and transportation networks - arrives as ready-to-query tables. No data pipeline, no procurement cycle, no file drops.</p>
+    <p class="lead">Third-party data - like the FEMA flood claims and county and ZIP boundaries in Snowflake Public Data (Free) - arrives as ready-to-query tables. No data pipeline, no procurement cycle, no file drops.</p>
     <ul class="plain">
       <li>Import once, query immediately alongside your own data</li>
       <li>Same agent interface works whether the data is yours or Marketplace-sourced</li>
@@ -106,20 +106,20 @@
 
   <section class="slide">
     <div class="eyebrow">Component &middot; observability and cost governance</div>
-    <h2>Cortex AI Gateway</h2>
-    <p class="lead">Every model call any agent makes flows through one governed control plane - the answer to "how do we control AI usage at scale?"</p>
+    <h2>Cortex AI Gateway (preview)</h2>
+    <p class="lead">One governed endpoint for apps and coding agents calling Snowflake-hosted models. In preview, on AWS commercial regions.</p>
     <div class="pillars cols-3">
       <div class="pillar">
         <h3>Usage observability</h3>
-        <p>Request volume, latency, tokens, and cost, broken down by model, user, and time window.</p>
+        <p>Traces and usage history per request: model, user, tokens, and cost.</p>
       </div>
       <div class="pillar">
-        <h3>OpenAI-compatible API</h3>
-        <p>Any app that speaks the OpenAI SDK gets governed access to Snowflake-hosted models, no per-model keys.</p>
+        <h3>Standard APIs</h3>
+        <p>OpenAI Chat Completions and Anthropic Messages formats, authenticated with Snowflake tokens. No per-model keys.</p>
       </div>
       <div class="pillar">
         <h3>Cost controls</h3>
-        <p>Rate limits, budget caps, and per-model routing rules, set by administrators.</p>
+        <p>Usage attributed to each Snowflake user, with budgets and per-user quotas set by administrators.</p>
       </div>
     </div>
   </section>

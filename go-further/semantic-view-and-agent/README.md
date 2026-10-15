@@ -7,7 +7,7 @@ This folder builds the AI layer from the CoWork section of the workshop:
 | `SDSC_WORKSHOP.SEMANTIC.SDSC_INSURANCE` | A **semantic view**: business definitions over the county view, for example what "mean paid" means and how to total counties correctly |
 | `SDSC_WORKSHOP.SEMANTIC.SDSC_FLOOD_RISK_AGENT` | A **Cortex Agent** that turns a plain-English question into SQL over the semantic view. You chat with it in Snowflake CoWork |
 
-You don't need any of this for Labs A to C.
+You don't need any of this for the lab.
 
 ## Files
 
@@ -34,7 +34,6 @@ Go through this list once. Most problems come from one of these.
 3. **Region.** Cortex models aren't hosted in every region. If you get
    "model not available" errors, an admin can enable cross-region
    inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`.
-   The workshop trial region (AWS US West, Oregon) doesn't need this.
 4. **Role.** On a trial, use `ACCOUNTADMIN`. On a company account, your
    role needs:
    - `USAGE` on the database and schemas, and `CREATE SCHEMA` if
@@ -129,7 +128,7 @@ is about $99K, because Brooklyn has far more claims.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `Table ... SANDY_COUNTY_CLAIMS does not exist or not authorized` | Lab 04 not run, or a different role | Run Lab 04 with the same role, or grant `SELECT` on the view |
+| `Table ... SANDY_COUNTY_CLAIMS does not exist or not authorized` | `04_build_the_pipeline.sql` not run, or a different role | Run `04_build_the_pipeline.sql` with the same role, or grant `SELECT` on the view |
 | `Insufficient privileges to operate on schema` | Role lacks `CREATE SEMANTIC VIEW` or `CREATE AGENT` | Use `ACCOUNTADMIN` on a trial, or ask an admin for the grants in [Before you start](#before-you-start) |
 | Errors mentioning Cortex, AI features, or a disabled feature | Trial without a payment method, or Cortex turned off by an admin | Add a payment method, or use [No AI features?](#no-ai-features) |
 | `Model ... not available in this region` | Region without that model | Ask an admin to enable cross-region inference (see Before you start) |
@@ -138,7 +137,7 @@ is about $99K, because Brooklyn has far more claims.
 | A colleague can't see or use the agent | Missing grants for their role | Use step 5 of the SQL file |
 | `Object ... already exists` or you replaced something you wanted | Name conflict | Rename before running (see Before you start, item 6) |
 | The YAML won't validate after you edited it | YAML indentation, or a renamed database | Indent with spaces, not tabs. Check `base_table.database`. Validate by adding `, TRUE` after the closing `$$` |
-| You renamed the listing database | Lab 04's views reference `SNOWFLAKE_PUBLIC_DATA_FREE` | Fix and re-run Lab 04. Nothing in this folder names the listing database |
+| You renamed the listing database | The views in `04_build_the_pipeline.sql` reference `SNOWFLAKE_PUBLIC_DATA_FREE` | Fix and re-run that file. Nothing in this folder names the listing database |
 | Numbers differ from the expected values | Underlying public data was refreshed | Compare with [`../../labs/EXPECTED_RESULTS.md`](../../labs/EXPECTED_RESULTS.md). Small drift is fine |
 
 ## No AI features?
