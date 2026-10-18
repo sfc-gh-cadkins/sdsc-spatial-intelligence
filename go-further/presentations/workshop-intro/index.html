@@ -546,11 +546,12 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p>Fifteen counties. Nassau is first with almost 27,000 claims, then Monmouth, then Queens. Manhattan itself is ninth.</p>
 <p><strong>Point at RANK_BY_MEAN_PAID</strong></p>
 <p>Now look at the last column. Ranked by what each claim paid, Manhattan is number one: about $236,000 per claim, more than three times Nassau. Fewest claims near the top of the list, costliest by far. Volume and severity tell two different stories, and you need both.</p>
-<p>Who's missing? Ocean County, New Jersey. 37,459 claims, the hardest-hit county of the whole storm. It's 60 km away.</p>
+<p>Now if you're like me, you might look at this and think the damage was concentrated right around Manhattan. We searched 25 km, and these are the counties that came back. But what if the circle is too small?</p>
 <p><strong>Knob at the top: distance_m, rerun</strong></p>
-<p>Set distance_m to 75000.</p>
+<p>Set distance_m to 75000. Rerun.</p>
 <p><strong>Results after the rerun</strong></p>
-<p>Ocean County jumps to number one. The distance you pick decides the answer you get. That's the most important habit in spatial analysis: say where you looked.</p>
+<p>Ocean County, New Jersey just appeared at number one. 37,459 claims, the hardest-hit county of the whole storm, and it was sitting 60 km away, outside our original search.</p>
+<p>The distance you pick decides the answer you get. That's the most important habit in spatial analysis: say where you looked.</p>
 <p><strong>Caveat</strong></p>
 <p>These are whole-county totals for counties near Manhattan, not claims inside a circle. FEMA's coordinates aren't precise enough for that.</p></aside>
 </section>
