@@ -522,6 +522,7 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p>Look at the last column. Only two ZIPs are within 3 km of the tip: the Seaport and Battery Park. Everyone else is FALSE.</p>
 <p>And East Harlem, 12.5 kilometres north, is fifth with 58 claims. So it wasn't just the tip that flooded.</p>
 <p><strong>Uncomment USE WAREHOUSE SDSC_WORKSHOP_WH_LARGE; and rerun</strong></p>
+<p>Same answer, same rows. Only the compute changed.</p>
 <p>That's our superpower. Start small, then one line and I'm on 16 times the compute. Whether it's 100 rows or 100 million, that's how Snowflake scales. You pay only while it runs, and it suspends after 60 seconds.</p>
 <p><strong>Knob at the top: within_m</strong></p>
 <p>Set within_m to 6000. Rerun.</p>
@@ -543,6 +544,8 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p>Four steps. Count Sandy claims by county. Turn each county boundary into geography. Take Manhattan's boundary as the anchor. Keep every county within 25 km, with ST_DWITHIN.</p>
 <p><strong>Run Step 2: results</strong></p>
 <p>Fifteen counties. Nassau is first with almost 27,000 claims, then Monmouth, then Queens. Manhattan itself is ninth.</p>
+<p><strong>Point at RANK_BY_MEAN_PAID</strong></p>
+<p>Now look at the last column. Ranked by what each claim paid, Manhattan is number one: about $236,000 per claim, more than three times Nassau. Fewest claims near the top of the list, costliest by far. Volume and severity tell two different stories, and you need both.</p>
 <p>Who's missing? Ocean County, New Jersey. 37,459 claims, the hardest-hit county of the whole storm. It's 60 km away.</p>
 <p><strong>Knob at the top: distance_m, rerun</strong></p>
 <p>Set distance_m to 75000.</p>
@@ -590,6 +593,7 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p>Count versus mean paid. Same counties, two different stories.</p>
 <p><strong>Point at the distance loop chart</strong></p>
 <p>Python reruns the spatial query from 0 to 80 km. Watch the number one county change as the circle grows.</p>
+<p>Queens leads up to 10 km. Nassau takes over from 20. And from 70 km, Ocean County. Same data, three different answers, depending only on where you drew the line.</p>
 <p>I'd normally spend an afternoon on this. CoCo built it from one prompt, and it's natively parallelized, so there's no rewriting to make it scale.</p>
 <p><strong>Back to CoCo: Python result</strong></p>
 <p>And the Python file's done. Same numbers: East Village on top, Manhattan number one by mean paid.</p>
