@@ -18,7 +18,10 @@ For the step-by-step path through every workshop section, see
   and map in your own CARTO org. Needs the CARTO CLI, a CARTO connection, and
   your own tract-population table.
 - [`presentations/`](presentations/): the workshop slide pages. Open
-  `presentations/index.html` in a browser.
+  `presentations/index.html` in a browser. Press **N** in a deck for speaker
+  notes. To edit notes and have them save straight into the deck, run
+  `python3 go-further/presentations/serve.py` and open the deck at
+  <http://localhost:8000/>.
 - [`skills/`](skills/): a Cortex Code skill that recreates a demo environment
   in your own account, including an optional CARTO connector.
 

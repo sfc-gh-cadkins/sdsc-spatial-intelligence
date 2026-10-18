@@ -1,5 +1,5 @@
 /* ==========================================================================
-   notes.js — presenter notes in a pop-up window, plus in-browser editing
+   notes.js — presenter notes in a pop-up window, with autosave
    Works with any deck that marks the current slide with `.slide.active`
    (deck.js and the workshop-intro inline script both do).
 
@@ -12,15 +12,20 @@
 
    Keys
    ----
-     N            open the notes window. It follows the deck as you flip.
-     E            toggle edit mode: click any slide text and type.
-     Cmd/Ctrl+S   save the page, including edited slides and notes. In
-                  Chrome and Edge you pick the file to overwrite (choose
-                  this deck's index.html); other browsers download a copy.
+     N   open the notes window. It follows the deck as you flip.
+     E   toggle slide edit mode: click any slide text and type. Esc stops.
 
-   In the notes window, arrow keys, space, or the Back and Next buttons
-   flip slides. Double-click the notes to edit them and press Esc when
-   done; edits copy straight into the deck, so Cmd/Ctrl+S saves them.
+   In the notes window, arrow keys, space, or the Back and Next buttons flip
+   slides. Click Edit to change the notes, then Done or Esc.
+
+   Autosave
+   --------
+   Edits save about a second after you stop typing.
+     - Served by serve.py (python3 serve.py in this folder): edits are
+       written straight into this deck's index.html.
+     - Anywhere else (GitHub Pages, a plain file): note edits are kept in
+       this browser only and reapplied when the deck reopens. Slide edits
+       need serve.py.
    ========================================================================== */
 
 (function () {
@@ -30,6 +35,7 @@
   if (!slides.length) return;
 
   var MARK = 'data-notes-js';
+  var STORE_KEY = 'speaker-notes:' + location.pathname;
   var style = document.createElement('style');
   style.setAttribute(MARK, '');
   style.textContent =
@@ -41,6 +47,8 @@
   document.head.appendChild(style);
 
   var win = null;
+  // The slide whose notes the notes window is showing; edits save to it.
+  var shownIndex = 0;
   var editing = false;
   var banner = null;
   var deckRoot = document.querySelector('.deck') || document.body;
@@ -69,16 +77,145 @@
     return n;
   }
 
+  /* ---------- runtime-state snapshot ----------
+     Deck scripts change classes and inline styles as you present (reveal
+     steps, progress bar). Record them at load so a save writes the deck
+     back the way it was authored, not mid-presentation. */
+
+  var RUNTIME = '.substep, .reveal-item, #progress, #counter';
+  var snapshot = Array.prototype.map.call(document.querySelectorAll(RUNTIME), function (n) {
+    return { cls: n.getAttribute('class'), style: n.getAttribute('style'), text: n.id === 'counter' ? n.textContent : null };
+  });
+
+  function restoreAttr(n, name, value) {
+    if (value === null) n.removeAttribute(name); else n.setAttribute(name, value);
+  }
+
+  function serialize() {
+    var root = document.documentElement.cloneNode(true);
+    Array.prototype.forEach.call(root.querySelectorAll('[' + MARK + ']'), function (n) { n.remove(); });
+    Array.prototype.forEach.call(root.querySelectorAll('[contenteditable]'), function (n) { n.removeAttribute('contenteditable'); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-revealed]'), function (n) { n.removeAttribute('data-revealed'); });
+    Array.prototype.forEach.call(root.querySelectorAll(RUNTIME), function (n, i) {
+      var s = snapshot[i];
+      if (!s) return;
+      restoreAttr(n, 'class', s.cls);
+      restoreAttr(n, 'style', s.style);
+      if (s.text !== null) n.textContent = s.text;
+    });
+    var body = root.querySelector('body');
+    if (body) {
+      body.classList.remove('notes-editing');
+      if (!body.className) body.removeAttribute('class');
+    }
+    // Save with the first slide active, matching how the deck opens.
+    Array.prototype.forEach.call(root.querySelectorAll('.slide'), function (s, i) {
+      s.classList.toggle('active', i === 0);
+    });
+    return '<!DOCTYPE html>\n' + root.outerHTML + '\n';
+  }
+
+  /* ---------- autosave ---------- */
+
+  var statusEls = [];
+  var saveTimer = null;
+  var lastStatus = '';
+  // Slide edits need the whole page; note edits only send the notes, so the
+  // server can swap them into the file without touching any other markup.
+  var slidesDirty = false;
+
+  function setStatus(text) {
+    lastStatus = text;
+    statusEls.forEach(function (s) { s.textContent = text; });
+  }
+
+  function readStore() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+
+  function currentNotes() {
+    return slides.map(function (s) {
+      var a = notesFor(s, false);
+      return a ? a.innerHTML : '';
+    });
+  }
+
+  // Notes as the file had them when the page loaded (before any stored edits),
+  // so a save sends only slides whose notes actually changed.
+  var savedNotes = currentNotes();
+
+  function changedNotes() {
+    var out = {};
+    currentNotes().forEach(function (n, i) { if (n !== savedNotes[i]) out[i] = n; });
+    return out;
+  }
+
+  function writeStore() {
+    var data = {};
+    currentNotes().forEach(function (n, i) { data[i] = n; });
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); return true; } catch (e) { return false; }
+  }
+
+  function saveNow() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    var full = slidesDirty;
+    var changed = changedNotes();
+    var sending = currentNotes();
+    if (!full && !Object.keys(changed).length) { setStatus('No changes'); return; }
+    var canPut = location.protocol === 'http:' || location.protocol === 'https:';
+    var put = canPut
+      ? fetch(location.pathname, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': full ? 'text/html; charset=utf-8' : 'application/json',
+            'X-Notes-Save': '1'
+          },
+          body: full ? serialize() : JSON.stringify({ notes: changed })
+        }).then(function (r) { return r.ok; }).catch(function () { return false; })
+      : Promise.resolve(false);
+    put.then(function (ok) {
+      var time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      if (ok) {
+        if (full) slidesDirty = false;
+        savedNotes = sending;
+        try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+        setStatus('Saved to file ' + time);
+      } else if (writeStore()) {
+        setStatus('Saved in this browser ' + time + ' (run serve.py to save to the file)');
+      } else {
+        setStatus('Not saved');
+      }
+    });
+  }
+
+  function scheduleSave() {
+    setStatus('Saving…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 900);
+  }
+
+  // Reapply note edits kept in this browser from a session without serve.py.
+  (function applyStored() {
+    var data = readStore();
+    Object.keys(data).forEach(function (k) {
+      var s = slides[+k];
+      if (!s) return;
+      var a = notesFor(s, true);
+      if (a.innerHTML !== data[k]) a.innerHTML = data[k];
+    });
+  })();
+
   /* ---------- notes window ---------- */
 
   function render() {
     if (!win || win.closed) return;
     var doc = win.document;
-    var aside = notesFor(slides[currentIndex()], false);
+    shownIndex = currentIndex();
+    var aside = notesFor(slides[shownIndex], false);
     var body = doc.getElementById('notes');
     // Notes are authored in this repo, so copying their markup is safe.
     body.innerHTML = aside && aside.innerHTML.trim() ? aside.innerHTML : '';
-    body.scrollTop = 0;
     doc.documentElement.scrollTop = 0;
   }
 
@@ -87,7 +224,7 @@
     var css = el(doc, 'style');
     css.textContent =
       'body{margin:0;background:#fff;color:#1f2937;font:20px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
-      '#notes{padding:28px 32px 96px;outline:none;min-height:80vh}' +
+      '#notes{padding:28px 32px 110px;outline:none;min-height:80vh}' +
       '#notes[contenteditable="true"]{box-shadow:inset 0 0 0 2px #29b5e8}' +
       '#notes:empty:before{content:"No notes for this slide.";color:#9ca3af;font-style:italic}' +
       '#notes p,#notes ul,#notes blockquote,#notes table{margin:0 0 1.1em}' +
@@ -98,30 +235,28 @@
       '#notes table{border-collapse:collapse;font-size:18px}#notes td{border-top:1px solid #e5e7eb;padding:8px 10px;vertical-align:top}' +
       '#notes hr{border:0;border-top:2px solid #e5e7eb;margin:2em 0}' +
       '#notes code{font-size:.9em;background:#f3f4f6;padding:1px 5px;border-radius:4px}' +
-      '#nav{position:fixed;right:20px;bottom:18px;display:flex;gap:10px;align-items:center}' +
-      '#status{color:#6b7280;font:14px -apple-system,sans-serif;margin-right:4px}' +
-      '#nav button{font:600 16px -apple-system,sans-serif;padding:10px 18px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#1f2937;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08)}' +
-      '#nav button:hover{background:#f3f4f6}#nav .edit.on{border-color:#29b5e8;color:#11567f}' +
-      '#nav .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#nav .next:hover{background:#1e9fcc}';
+      '#bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:12px 20px;background:rgba(255,255,255,.94);border-top:1px solid #e5e7eb}' +
+      '#status{flex:1;color:#6b7280;font:14px -apple-system,sans-serif}' +
+      '#bar button{font:600 16px -apple-system,sans-serif;padding:10px 18px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#1f2937;cursor:pointer}' +
+      '#bar button:hover{background:#f3f4f6}#bar .edit.on{border-color:#29b5e8;color:#11567f}' +
+      '#bar .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#bar .next:hover{background:#1e9fcc}';
     doc.head.appendChild(css);
 
     var notes = el(doc, 'div'); notes.id = 'notes';
     doc.body.appendChild(notes);
 
-    var nav = el(doc, 'div'); nav.id = 'nav';
-    var status = el(doc, 'span', 'status'); status.id = 'status';
+    var bar = el(doc, 'div'); bar.id = 'bar';
+    var status = el(doc, 'span'); status.id = 'status'; status.textContent = lastStatus;
     var edit = el(doc, 'button', 'edit', 'Edit');
-    var saveBtn = el(doc, 'button', 'save', 'Save');
-    var back = el(doc, 'button', 'back', '← Back');
-    var fwd = el(doc, 'button', 'next', 'Next →');
-    [status, edit, saveBtn, back, fwd].forEach(function (n) { nav.appendChild(n); });
-    doc.body.appendChild(nav);
+    var back = el(doc, 'button', 'back', '\u2190 Back');
+    var fwd = el(doc, 'button', 'next', 'Next \u2192');
+    [status, edit, back, fwd].forEach(function (n) { bar.appendChild(n); });
+    doc.body.appendChild(bar);
+    statusEls.push(status);
 
     function flip(key) {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
     }
-    back.addEventListener('click', function () { stopEditing(); flip('ArrowLeft'); });
-    fwd.addEventListener('click', function () { stopEditing(); flip('ArrowRight'); });
 
     // Notes are read-only until you click Edit, so arrow keys always flip
     // slides. Done, Esc, Back, or Next stops editing.
@@ -137,24 +272,24 @@
       notes.blur();
       edit.textContent = 'Edit';
       edit.classList.remove('on');
+      if (saveTimer) saveNow();
     }
-    edit.addEventListener('click', function () {
-      if (notes.isContentEditable) stopEditing(); else startEditing();
-    });
-    notes.addEventListener('dblclick', function () { if (!notes.isContentEditable) startEditing(); });
-    saveBtn.addEventListener('click', function () { save(win, status); });
-    // Keep focus off the buttons so Space and Enter don't flip twice.
-    nav.addEventListener('mousedown', function (e) { e.preventDefault(); });
 
-    // Copy edits into the deck so saving from either window keeps them.
+    edit.addEventListener('click', function () { if (notes.isContentEditable) stopEditing(); else startEditing(); });
+    back.addEventListener('click', function () { stopEditing(); flip('ArrowLeft'); });
+    fwd.addEventListener('click', function () { stopEditing(); flip('ArrowRight'); });
+    notes.addEventListener('dblclick', function () { if (!notes.isContentEditable) startEditing(); });
+    // Keep focus off the buttons so Space and Enter don't flip twice.
+    bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+    // Copy edits into the deck, then autosave.
     notes.addEventListener('input', function () {
-      notesFor(slides[currentIndex()], true).innerHTML = notes.innerHTML;
-      status.textContent = 'Unsaved changes';
+      notesFor(slides[shownIndex], true).innerHTML = notes.innerHTML;
+      scheduleSave();
     });
 
     doc.addEventListener('keydown', function (e) {
-      if (isSave(e)) { e.preventDefault(); save(win, status); return; }
-      // While editing, keys type; Esc stops editing.
+      if (isSave(e)) { e.preventDefault(); saveNow(); return; }
       if (e.target.isContentEditable) { if (e.key === 'Escape') stopEditing(); return; }
       var keys = ['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp', 'Enter', 'Home', 'End'];
       if (keys.indexOf(e.key) === -1) return;
@@ -170,96 +305,46 @@
     win.document.open();
     win.document.write('<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>');
     win.document.close();
+    statusEls = [];
     build(win.document);
     render();
   }
 
-  /* ---------- edit mode ---------- */
+  /* ---------- slide edit mode ---------- */
 
   function setEditing(on) {
     editing = on;
-    deckRoot.contentEditable = on ? 'true' : 'false';
-    if (!on) deckRoot.removeAttribute('contenteditable');
+    if (on) deckRoot.contentEditable = 'true'; else deckRoot.removeAttribute('contenteditable');
     document.body.classList.toggle('notes-editing', on);
     if (on && !banner) {
       banner = document.createElement('div');
       banner.className = 'notes-edit-banner';
       banner.setAttribute(MARK, '');
-      banner.textContent = 'Editing · Esc to stop · Cmd/Ctrl+S to save';
+      banner.textContent = 'Editing slides · Esc to stop · autosaves';
       document.body.appendChild(banner);
     } else if (!on && banner) {
       banner.remove();
       banner = null;
+      if (slidesDirty) saveNow();
     }
   }
 
-  /* ---------- save ---------- */
+  deckRoot.addEventListener('input', function () {
+    if (!editing) return;
+    slidesDirty = true;
+    scheduleSave();
+  });
+
+  /* ---------- keys ---------- */
 
   function isSave(e) {
     return (e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S');
   }
 
-  function serialize() {
-    var root = document.documentElement.cloneNode(true);
-    Array.prototype.forEach.call(root.querySelectorAll('[' + MARK + ']'), function (n) { n.remove(); });
-    Array.prototype.forEach.call(root.querySelectorAll('[contenteditable]'), function (n) { n.removeAttribute('contenteditable'); });
-    var body = root.querySelector('body');
-    if (body) {
-      body.classList.remove('notes-editing');
-      if (!body.className) body.removeAttribute('class');
-    }
-    // Save with the first slide active, matching how the deck opens.
-    Array.prototype.forEach.call(root.querySelectorAll('.slide'), function (s, i) {
-      s.classList.toggle('active', i === 0);
-    });
-    return '<!DOCTYPE html>\n' + root.outerHTML + '\n';
-  }
-
-  // Remembered after the first save, so later saves overwrite the same
-  // file without asking again.
-  var fileHandle = null;
-
-  // ctx is the window the click or keypress happened in. Chrome only opens
-  // the save dialog from the window that has the user gesture, so a save
-  // started in the notes window must use the notes window's picker.
-  function save(ctx, status) {
-    ctx = ctx || window;
-    var html = serialize();
-    function say(t) { if (status) status.textContent = t; }
-    function write(handle) {
-      return handle.createWritable().then(function (w) {
-        return w.write(html).then(function () { return w.close(); });
-      }).then(function () { fileHandle = handle; say('Saved ' + new Date().toLocaleTimeString()); });
-    }
-    if (ctx.showSaveFilePicker) {
-      var pick = fileHandle ? Promise.resolve(fileHandle) : ctx.showSaveFilePicker({
-        suggestedName: 'index.html',
-        types: [{ description: 'HTML', accept: { 'text/html': ['.html'] } }]
-      });
-      pick.then(write).catch(function (err) {
-        if (err && err.name === 'AbortError') return;
-        fileHandle = null;
-        say('Save failed');
-        ctx.alert('Save failed: ' + (err && err.message));
-      });
-      return;
-    }
-    var doc = ctx.document;
-    var a = doc.createElement('a');
-    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-    a.download = 'index.html';
-    doc.body.appendChild(a);
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    say('Downloaded index.html');
-  }
-
-  /* ---------- keys ---------- */
-
   // Capture phase, so typing in edit mode never reaches the deck's
   // navigation handler (which would flip slides on space or arrows).
   window.addEventListener('keydown', function (e) {
-    if (isSave(e)) { e.preventDefault(); e.stopImmediatePropagation(); save(); return; }
+    if (isSave(e)) { e.preventDefault(); e.stopImmediatePropagation(); saveNow(); return; }
     if (editing && e.target.isContentEditable) {
       if (e.key === 'Escape') { e.preventDefault(); setEditing(false); }
       e.stopImmediatePropagation();
@@ -274,5 +359,8 @@
 
   var observer = new MutationObserver(render);
   slides.forEach(function (s) { observer.observe(s, { attributes: true, attributeFilter: ['class'] }); });
-  window.addEventListener('beforeunload', function () { if (win && !win.closed) win.close(); });
+  window.addEventListener('beforeunload', function () {
+    if (saveTimer) saveNow();
+    if (win && !win.closed) win.close();
+  });
 })();
