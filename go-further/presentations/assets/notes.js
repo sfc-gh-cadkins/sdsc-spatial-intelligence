@@ -18,10 +18,9 @@
                   Chrome and Edge you pick the file to overwrite (choose
                   this deck's index.html); other browsers download a copy.
 
-   Notes are editable in the notes window; edits copy straight into the
-   deck, so Cmd/Ctrl+S from either window saves them. Arrow keys in the
-   notes window flip slides unless you're typing in the notes;
-   press Esc to stop typing.
+   In the notes window, arrow keys, space, or the Back and Next buttons
+   flip slides. Double-click the notes to edit them and press Esc when
+   done; edits copy straight into the deck, so Cmd/Ctrl+S saves them.
    ========================================================================== */
 
 (function () {
@@ -88,7 +87,8 @@
     var css = el(doc, 'style');
     css.textContent =
       'body{margin:0;background:#fff;color:#1f2937;font:20px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
-      '#notes{padding:28px 32px 64px;outline:none;min-height:80vh}' +
+      '#notes{padding:28px 32px 96px;outline:none;min-height:80vh}' +
+      '#notes[contenteditable="true"]{box-shadow:inset 0 0 0 2px #29b5e8}' +
       '#notes:empty:before{content:"No notes for this slide.";color:#9ca3af;font-style:italic}' +
       '#notes p,#notes ul,#notes blockquote,#notes table{margin:0 0 1.1em}' +
       '#notes ul{padding-left:1.3em}#notes li{margin:0 0 .6em}' +
@@ -97,12 +97,40 @@
       '#notes blockquote{padding:.2em 0 .2em 14px;border-left:3px solid #29b5e8;color:#374151}' +
       '#notes table{border-collapse:collapse;font-size:18px}#notes td{border-top:1px solid #e5e7eb;padding:8px 10px;vertical-align:top}' +
       '#notes hr{border:0;border-top:2px solid #e5e7eb;margin:2em 0}' +
-      '#notes code{font-size:.9em;background:#f3f4f6;padding:1px 5px;border-radius:4px}';
+      '#notes code{font-size:.9em;background:#f3f4f6;padding:1px 5px;border-radius:4px}' +
+      '#nav{position:fixed;right:20px;bottom:18px;display:flex;gap:10px}' +
+      '#nav button{font:600 16px -apple-system,sans-serif;padding:10px 18px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#1f2937;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08)}' +
+      '#nav button:hover{background:#f3f4f6}#nav .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#nav .next:hover{background:#1e9fcc}';
     doc.head.appendChild(css);
 
     var notes = el(doc, 'div'); notes.id = 'notes';
-    notes.contentEditable = 'true';
+    notes.title = 'Double-click to edit';
     doc.body.appendChild(notes);
+
+    var nav = el(doc, 'div'); nav.id = 'nav';
+    var back = el(doc, 'button', 'back', '← Back');
+    var fwd = el(doc, 'button', 'next', 'Next →');
+    nav.appendChild(back); nav.appendChild(fwd);
+    doc.body.appendChild(nav);
+
+    function flip(key) {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
+    }
+    back.addEventListener('click', function () { flip('ArrowLeft'); });
+    fwd.addEventListener('click', function () { flip('ArrowRight'); });
+
+    // Notes are read-only so arrow keys always flip slides.
+    // Double-click to edit; Esc or clicking a button stops editing.
+    function stopEditing() {
+      if (notes.isContentEditable) { notes.removeAttribute('contenteditable'); notes.blur(); }
+    }
+    notes.addEventListener('dblclick', function () {
+      if (notes.isContentEditable) return;
+      notes.contentEditable = 'true';
+      notes.focus();
+    });
+    // Keep focus off the buttons so Space and Enter don't flip twice.
+    nav.addEventListener('mousedown', function (e) { e.preventDefault(); stopEditing(); });
 
     // Copy edits into the deck so saving from either window keeps them.
     notes.addEventListener('input', function () {
@@ -111,12 +139,12 @@
 
     doc.addEventListener('keydown', function (e) {
       if (isSave(e)) { e.preventDefault(); save(); return; }
-      // Esc leaves the notes so arrow keys flip slides again.
-      if (e.target.isContentEditable) { if (e.key === 'Escape') e.target.blur(); return; }
+      // While editing, keys type; Esc stops editing.
+      if (e.target.isContentEditable) { if (e.key === 'Escape') stopEditing(); return; }
       var keys = ['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp', 'Enter', 'Home', 'End'];
       if (keys.indexOf(e.key) === -1) return;
       e.preventDefault();
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: e.key, bubbles: true }));
+      flip(e.key);
     });
   }
 
