@@ -107,6 +107,46 @@ CoWork can draw bar, line, scatter, and other charts, but not maps. For
 the map, use the county view's `BOUNDARY` column in CARTO or another map
 tool.
 
+## Schedule it: CoWork automations
+
+An automation subscribes you to a question. On each run, CoWork asks the
+question again against the current data and emails you a summary with a link
+to the full thread, where you can ask follow-up questions.
+
+**From the chat.** After an answer you like, reply:
+
+> "Send me this as a short briefing every Monday at 8 AM: the top five counties
+> by claims and by mean paid, plus anything that changed since the last run."
+
+CoWork confirms the schedule and the first delivery date. You can also start
+from the **Automations** tab: select **Create automation**, then give it a
+name, the instructions (the question), and a frequency.
+
+**Manage it in plain language:**
+
+| To do this | Say something like |
+|---|---|
+| List them | "What automations do I have?" |
+| Change the time | "Move my Monday Sandy briefing to 7 AM." |
+| Pause or resume | "Pause my Monday Sandy briefing." |
+| Delete | "Delete my Monday Sandy briefing." |
+
+**Worth knowing:**
+
+- **It runs as you.** Each run uses your own role and warehouse, so role-based
+  access, row access policies, and masking policies all still apply.
+- **It costs compute.** Each run is billed as a standard Snowflake task. The
+  shortest schedule is hourly. Delete demo automations after the workshop.
+- **Email needs a verified address.** Without one, you can still create the
+  automation and review its runs in the Automations tab.
+- **Admins control access** through the `EXECUTE AGENT TASK` account
+  privilege, which is granted to `PUBLIC` by default.
+- **The data here is historical.** Sandy claims don't change, so a weekly
+  briefing on this dataset shows the mechanics, not new information. Point the
+  same pattern at data that changes to get real value from it.
+
+See [Automations in Snowflake CoWork](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-cowork/automations).
+
 ## What the semantic view defines
 
 | Name | Kind | Meaning |

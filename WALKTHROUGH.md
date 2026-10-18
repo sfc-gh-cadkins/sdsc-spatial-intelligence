@@ -268,6 +268,18 @@ current steps for connecting to Snowflake.
 2. Manhattan's mean is about $236,483, the same as Step 2 of the lab.
 3. It says historical claims are not future risk.
 
+**Then turn the answer into an automation.** Reply in the same chat:
+
+> *"Send me this as a short briefing every Monday at 8 AM: the top five
+> counties by claims and by mean paid, plus anything that changed since the
+> last run."*
+
+CoWork confirms the schedule and the first delivery date. Open the
+**Automations** tab to see its schedule and status. Each run asks the question again against the current data,
+uses your own role, and arrives as an email with a link back to the thread.
+Pause or delete it when you're done: *"Delete my Monday Sandy briefing."* More
+detail is in [Schedule it](go-further/semantic-view-and-agent/README.md#schedule-it-cowork-automations).
+
 ## 11. Clean up
 
 Run [`labs/99_cleanup.sql`](labs/99_cleanup.sql). It drops only what this
