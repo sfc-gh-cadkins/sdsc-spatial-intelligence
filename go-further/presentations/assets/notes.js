@@ -20,7 +20,8 @@
 
    Notes are editable in the notes window; edits copy straight into the
    deck, so Cmd/Ctrl+S from either window saves them. Arrow keys in the
-   notes window flip slides unless you're typing in the notes.
+   notes window flip slides unless you're typing in the notes;
+   press Esc to stop typing.
    ========================================================================== */
 
 (function () {
@@ -44,12 +45,6 @@
   var editing = false;
   var banner = null;
   var deckRoot = document.querySelector('.deck') || document.body;
-
-  function titleOf(slide) {
-    if (!slide) return '';
-    var h = slide.querySelector('h1, h2, h3');
-    return h ? h.textContent.replace(/\s+/g, ' ').trim() : '';
-  }
 
   function currentIndex() {
     for (var i = 0; i < slides.length; i++) {
@@ -80,15 +75,7 @@
   function render() {
     if (!win || win.closed) return;
     var doc = win.document;
-    var i = currentIndex();
-    var slide = slides[i];
-    var aside = notesFor(slide, false);
-
-    doc.getElementById('count').textContent = (i + 1) + ' / ' + slides.length;
-    doc.getElementById('now').textContent = titleOf(slide) || 'Slide ' + (i + 1);
-    doc.getElementById('next').textContent =
-      i + 1 < slides.length ? 'Next: ' + (titleOf(slides[i + 1]) || 'Slide ' + (i + 2)) : 'Last slide';
-
+    var aside = notesFor(slides[currentIndex()], false);
     var body = doc.getElementById('notes');
     // Notes are authored in this repo, so copying their markup is safe.
     body.innerHTML = aside && aside.innerHTML.trim() ? aside.innerHTML : '';
@@ -100,31 +87,22 @@
     doc.title = 'Speaker notes - ' + document.title;
     var css = el(doc, 'style');
     css.textContent =
-      'body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#111827;color:#f3f4f6}' +
-      'header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#1f2937}' +
-      '#count{font-weight:600;font-variant-numeric:tabular-nums}#hint{color:#9ca3af;font-size:13px}' +
-      'main{padding:16px 20px 48px}#now{font-size:22px;font-weight:700;margin:0 0 4px}' +
-      '#next{color:#9ca3af;margin:0 0 16px}' +
-      '#notes{font-size:19px;line-height:1.55;outline:none;min-height:3em;border-radius:6px;padding:4px}' +
-      '#notes:focus{box-shadow:0 0 0 1px #29b5e8}#notes:empty:before{content:"No notes for this slide. Click to add some.";color:#6b7280;font-style:italic}' +
-      '#notes h3{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:#29b5e8;margin:1.2em 0 .3em}' +
-      '#notes ul{padding-left:1.2em}#notes li{margin:0 0 .4em}#notes blockquote{margin:.4em 0;padding-left:12px;border-left:3px solid #29b5e8}' +
-      '#notes table{border-collapse:collapse;font-size:16px}#notes td{border-top:1px solid #374151;padding:6px 8px;vertical-align:top}' +
-      '#notes hr{border:0;border-top:1px solid #374151;margin:1.5em 0}';
+      'body{margin:0;background:#fff;color:#1f2937;font:20px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
+      '#notes{padding:28px 32px 64px;outline:none;min-height:80vh}' +
+      '#notes:empty:before{content:"No notes for this slide.";color:#9ca3af;font-style:italic}' +
+      '#notes p,#notes ul,#notes blockquote,#notes table{margin:0 0 1.1em}' +
+      '#notes ul{padding-left:1.3em}#notes li{margin:0 0 .6em}' +
+      '#notes h3{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:#11567f;margin:2em 0 .6em;padding-top:1em;border-top:1px solid #e5e7eb}' +
+      '#notes h3:first-child{margin-top:0;padding-top:0;border-top:0}' +
+      '#notes blockquote{padding:.2em 0 .2em 14px;border-left:3px solid #29b5e8;color:#374151}' +
+      '#notes table{border-collapse:collapse;font-size:18px}#notes td{border-top:1px solid #e5e7eb;padding:8px 10px;vertical-align:top}' +
+      '#notes hr{border:0;border-top:2px solid #e5e7eb;margin:2em 0}' +
+      '#notes code{font-size:.9em;background:#f3f4f6;padding:1px 5px;border-radius:4px}';
     doc.head.appendChild(css);
 
-    var header = el(doc, 'header');
-    var count = el(doc, 'span'); count.id = 'count';
-    var hint = el(doc, 'span', '', 'Click notes to edit · Cmd/Ctrl+S saves'); hint.id = 'hint';
-    header.appendChild(count); header.appendChild(hint);
-
-    var main = el(doc, 'main');
-    var now = el(doc, 'h1'); now.id = 'now';
-    var next = el(doc, 'p'); next.id = 'next';
     var notes = el(doc, 'div'); notes.id = 'notes';
     notes.contentEditable = 'true';
-    main.appendChild(now); main.appendChild(next); main.appendChild(notes);
-    doc.body.appendChild(header); doc.body.appendChild(main);
+    doc.body.appendChild(notes);
 
     // Copy edits into the deck so saving from either window keeps them.
     notes.addEventListener('input', function () {
@@ -133,7 +111,8 @@
 
     doc.addEventListener('keydown', function (e) {
       if (isSave(e)) { e.preventDefault(); save(); return; }
-      if (e.target.isContentEditable) return;
+      // Esc leaves the notes so arrow keys flip slides again.
+      if (e.target.isContentEditable) { if (e.key === 'Escape') e.target.blur(); return; }
       var keys = ['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp', 'Enter', 'Home', 'End'];
       if (keys.indexOf(e.key) === -1) return;
       e.preventDefault();
