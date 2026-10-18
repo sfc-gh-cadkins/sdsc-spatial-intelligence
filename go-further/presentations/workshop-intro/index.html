@@ -568,38 +568,46 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p><strong>Caveat</strong></p>
 <p>One caveat: this is the zone at the time of the loss. FEMA has redrawn New York's maps since Sandy, partly because of exactly this.</p></aside>
 </section>
-<section class="notes-page" data-topic="Ecosystem: hand to Ryan">
-  <aside class="notes"><p><strong>Back to the slides: Pillar 3, Ecosystem</strong></p>
-<p>That brings us to our third pillar: the ecosystem. You've already seen half of it. The FEMA data came from Marketplace, shared live, nothing loaded. The other half is partners.</p>
-<p>Everything we just built lives in Snowflake, and it's still a table. Think about who needs this answer: the underwriter deciding whether East Harlem is really low risk, the claims lead deciding where to send adjusters. They're not going to open a SQL worksheet. They need a map they can filter, share and drop into their own tools.</p>
-<p><strong>Hand to Ryan</strong></p>
-<p>That's what CARTO does, and it reads the exact county view we just built, live, with nothing exported. Ryan Miller from CARTO is going to show you. Ryan?</p></aside>
-</section>
+
+
 <section class="notes-page" data-topic="AI with CoCo">
-  <aside class="notes"><p><strong>Back from Ryan: open CoCo in the 01_sandy workspace</strong></p>
-<p>Everything so far was plain SQL. Now, how does AI help? This part runs on my account.</p>
-<p><strong>CoCo panel open</strong></p>
-<p>CoCo is Snowflake's coding agent. It reads your files, writes code, runs it, and checks the results, wherever you work: in the browser, on the desktop, or in a CLI.</p>
-<h3>SQL to Python</h3>
+  <aside class="notes"><p><strong>Transition: after Step 3, stay in the workspace</strong></p>
+<p>That's the core of what spatial analysis looks like in SQL. Three steps, three questions, three answers. In a moment I'll hand it to Ryan to show what the ecosystem side looks like, but I want to skip ahead to pillar four first, because this is the part that excites me the most.</p>
+<h3>CoCo: what it is</h3>
+<p><strong>Open the CoCo panel in the workspace</strong></p>
+<p>This is CoCo, Snowflake's coding agent. It reads your files, writes code, runs it, and checks the results. It works in the browser, on the desktop, or in a CLI.</p>
+<p>And it's not a spatial tool. It's a general-purpose agent that happens to work with spatial data the same way it works with anything else: financial models, data pipelines, machine learning, whatever's in your warehouse. If you can write it in SQL or Python, CoCo can help you build it, debug it, or explain it.</p>
+<p>I'm going to show three things, and they'll all use the same lab you just ran.</p>
+<h3>CoCo prompt 1: SQL to Python</h3>
 <p><strong>Paste prompt 1 (bottom of 01_sandy) and send</strong></p>
 <p>Same lab, same three steps, same knobs, but in Python. Look at the last line of the prompt: I'm asking it to prove the numbers match.</p>
 <p><strong>While CoCo works</strong></p>
 <p>The spatial functions still run inside Snowflake. Python just orchestrates them. Nothing gets pulled down to my laptop.</p>
-<p><strong>Switch to the notebook</strong></p>
-<p>Let's see if CoCo can do this in Python. While it works, let me show you something you're more familiar with.</p>
-<h3>SQL to a notebook</h3>
+<p><strong>Switch to the notebook while it runs</strong></p>
+<p>Let's see if CoCo can do this in Python. While it works, let me show you something it already built.</p>
+<h3>CoCo prompt 2: SQL to a notebook with visuals</h3>
 <p><strong>Open the finished Snowflake Notebook</strong></p>
-<p>Here's where that goes next: the same story as a Snowflake Notebook. A fully managed, interactive, cell-based environment in Snowsight that combines SQL, Python and Markdown in one workspace.</p>
+<p>Same story, now as a Snowflake Notebook: a fully managed, interactive, cell-based environment in Snowsight that combines SQL, Python and Markdown in one workspace. CoCo wrote the whole thing from one prompt.</p>
 <p><strong>Point at the two county maps side by side</strong></p>
 <p>Count versus mean paid. Same counties, two different stories.</p>
 <p><strong>Point at the distance loop chart</strong></p>
 <p>Python reruns the spatial query from 0 to 80 km. Watch the number one county change as the circle grows.</p>
 <p>Queens leads up to 10 km. Nassau takes over from 20. And from 70 km, Ocean County. Same data, three different answers, depending only on where you drew the line.</p>
 <p>I'd normally spend an afternoon on this. CoCo built it from one prompt, and it's natively parallelized, so there's no rewriting to make it scale.</p>
+<h3>CoCo prompt 3: the CARTO demo</h3>
+<p><strong>Show the CoCo CLI running the CARTO forecast-cone demo</strong></p>
+<p>This last one is different. CoCo is running on the command line with CARTO's own tools installed as skills. It downloaded real NOAA hurricane advisories, imported the shapefiles, ran a spatial workflow to estimate the population in each forecast cone, and built an interactive map with a timeline slider, all from one prompt.</p>
+<p>I'm showing this to make a point: CoCo doesn't just work inside Snowflake. It can reach out to partner tools, cloud APIs, and local files. The same agent that wrote your Python and your notebook can orchestrate a multi-step geospatial workflow end to end.</p>
 <p><strong>Back to CoCo: Python result</strong></p>
-<p>And the Python file's done. Same numbers: East Village on top, Manhattan number one by mean paid.</p>
-<p><strong>Close the section</strong></p>
-<p>We've gone from SQL, to Python, to notebooks with visuals. That's across the spectrum.</p></aside>
+<p>And the Python file from prompt 1 is done. Same numbers: East Village on top, Manhattan number one by mean paid.</p>
+<p>We've gone from SQL, to Python, to notebooks with visuals, to a full CARTO workflow. One agent, four formats.</p></aside>
+</section>
+<section class="notes-page" data-topic="Ecosystem: hand to Ryan">
+  <aside class="notes"><p><strong>Transition back to Pillar 3: Ecosystem</strong></p>
+<p>Now let's circle back to pillar three: the ecosystem. You've already seen half of it. The FEMA data came from Marketplace, shared live, nothing loaded. The other half is partners.</p>
+<p>Everything we just built lives in Snowflake, and it's still a table. Think about who needs this answer: the underwriter deciding whether East Harlem is really low risk, the claims lead deciding where to send adjusters. They're not going to open a SQL worksheet. They need a map they can filter, share and drop into their own tools.</p>
+<p><strong>Hand to Ryan</strong></p>
+<p>That's what CARTO does, and it reads the exact county view we just built, live, with nothing exported. Ryan Miller from CARTO is going to show you. Ryan?</p></aside>
 </section>
 <section class="notes-page" data-topic="The pipeline">
   <aside class="notes"><p><strong>Slide: From share to answer</strong></p>
