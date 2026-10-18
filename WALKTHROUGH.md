@@ -5,7 +5,7 @@ afterwards. Each section says what to click, what to run, and what you should
 see.
 
 **You need:** a browser and a Snowflake trial account. Nothing to install or
-clone.
+clone on your laptop.
 
 | # | Section | Runs on a trial? |
 |---|---|---|
@@ -38,8 +38,35 @@ Compare every result with [`labs/EXPECTED_RESULTS.md`](labs/EXPECTED_RESULTS.md)
 2. Get the free data: open **Snowflake Public Data (Free)** at
    <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255> and click
    **Get**. Keep the default database name, `SNOWFLAKE_PUBLIC_DATA_FREE`.
-3. In Snowsight, go to **Projects > Workspaces** and create a SQL file.
-4. Paste [`labs/00_setup_and_check.sql`](labs/00_setup_and_check.sql) and run
+3. Load the workshop files into a Workspace straight from GitHub. This is
+   how we run it on screen.
+   1. In Snowsight, go to **Projects > Workspaces**, create a SQL file, and
+      run this once. It lets Snowflake read public repos under this GitHub
+      account, with no credentials:
+
+      ```sql
+      CREATE API INTEGRATION IF NOT EXISTS SDSC_GITHUB
+        API_PROVIDER = git_https_api
+        API_ALLOWED_PREFIXES = ('https://github.com/sfc-gh-cadkins')
+        ENABLED = TRUE;
+      ```
+
+      This needs a role that can create integrations, such as ACCOUNTADMIN.
+      On a trial, your user has it.
+   2. Open the **Workspaces** menu and pick **From Git repository**.
+   3. Paste `https://github.com/sfc-gh-cadkins/sdsc-spatial-intelligence` as
+      the repository URL.
+   4. Choose `SDSC_GITHUB` as the API integration and **Public repository**
+      as the authentication, then click **Create**.
+
+   The workspace opens with the whole repo: `labs/`, `go-further/`, and the
+   rest. To get updates later, open **Changes** and click **Pull**. You can't
+   push to this repo from it; to keep your own edits, copy a file into a
+   private workspace.
+
+   Can't create an integration? Create a SQL file in Workspaces and paste
+   each lab file in instead.
+4. Open [`labs/00_setup_and_check.sql`](labs/00_setup_and_check.sql) and run
    it all.
 
 **You should see:** every check row returns `OK`. The script creates one

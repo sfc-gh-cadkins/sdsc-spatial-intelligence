@@ -17,7 +17,7 @@ presented by Snowflake and CARTO.
 
 ## Participant path: browser only
 
-You need a browser and a Snowflake trial account. Nothing to install or clone. You don't need Python, a CLI, a CARTO account, or a credit card.
+You need a browser and a Snowflake trial account. Nothing to install or clone on your laptop. You don't need Python, a CLI, a CARTO account, or a credit card.
 
 **Start with [`WALKTHROUGH.md`](WALKTHROUGH.md).** It covers every section of the
 workshop in order: what to click, what to run, and what you should see.
@@ -25,7 +25,28 @@ workshop in order: what to click, what to run, and what you should see.
 1. **Create a trial:** <https://signup.snowflake.com/>
 2. **Get the free data:** open *Snowflake Public Data (Free)* at
    <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255> and click **Get**.
-3. **Open Workspaces** in Snowsight (Projects > Workspaces), create a SQL file, and paste and run each file in order. The Python and notebook versions of the lab are covered in the walkthrough:
+3. **Load the files into a Workspace from GitHub.** This is how we run it on
+   screen. In a SQL file, run this once (it lets Snowflake read public repos
+   under this GitHub account; no credentials):
+
+   ```sql
+   CREATE API INTEGRATION IF NOT EXISTS SDSC_GITHUB
+     API_PROVIDER = git_https_api
+     API_ALLOWED_PREFIXES = ('https://github.com/sfc-gh-cadkins')
+     ENABLED = TRUE;
+   ```
+
+   Then go to **Projects > Workspaces**, open the Workspaces menu, and pick
+   **From Git repository**. Paste
+   `https://github.com/sfc-gh-cadkins/sdsc-spatial-intelligence`, choose
+   `SDSC_GITHUB` as the API integration, choose **Public repository**, and
+   click **Create**. Every file below appears in the workspace. Details are in
+   the walkthrough's [set-up section](WALKTHROUGH.md#0-set-up).
+
+   No permission to create an integration? Create a SQL file in Workspaces
+   instead, and paste and run each file in order.
+
+Run the files in order. The Python and notebook versions of the lab are covered in the walkthrough:
 
 | File | Time | What it does |
 |---|---|---|
