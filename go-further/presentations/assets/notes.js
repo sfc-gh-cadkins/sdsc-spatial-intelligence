@@ -98,47 +98,62 @@
       '#notes table{border-collapse:collapse;font-size:18px}#notes td{border-top:1px solid #e5e7eb;padding:8px 10px;vertical-align:top}' +
       '#notes hr{border:0;border-top:2px solid #e5e7eb;margin:2em 0}' +
       '#notes code{font-size:.9em;background:#f3f4f6;padding:1px 5px;border-radius:4px}' +
-      '#nav{position:fixed;right:20px;bottom:18px;display:flex;gap:10px}' +
+      '#nav{position:fixed;right:20px;bottom:18px;display:flex;gap:10px;align-items:center}' +
+      '#status{color:#6b7280;font:14px -apple-system,sans-serif;margin-right:4px}' +
       '#nav button{font:600 16px -apple-system,sans-serif;padding:10px 18px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#1f2937;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08)}' +
-      '#nav button:hover{background:#f3f4f6}#nav .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#nav .next:hover{background:#1e9fcc}';
+      '#nav button:hover{background:#f3f4f6}#nav .edit.on{border-color:#29b5e8;color:#11567f}' +
+      '#nav .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#nav .next:hover{background:#1e9fcc}';
     doc.head.appendChild(css);
 
     var notes = el(doc, 'div'); notes.id = 'notes';
-    notes.title = 'Double-click to edit';
     doc.body.appendChild(notes);
 
     var nav = el(doc, 'div'); nav.id = 'nav';
+    var status = el(doc, 'span', 'status'); status.id = 'status';
+    var edit = el(doc, 'button', 'edit', 'Edit');
+    var saveBtn = el(doc, 'button', 'save', 'Save');
     var back = el(doc, 'button', 'back', '← Back');
     var fwd = el(doc, 'button', 'next', 'Next →');
-    nav.appendChild(back); nav.appendChild(fwd);
+    [status, edit, saveBtn, back, fwd].forEach(function (n) { nav.appendChild(n); });
     doc.body.appendChild(nav);
 
     function flip(key) {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
     }
-    back.addEventListener('click', function () { flip('ArrowLeft'); });
-    fwd.addEventListener('click', function () { flip('ArrowRight'); });
+    back.addEventListener('click', function () { stopEditing(); flip('ArrowLeft'); });
+    fwd.addEventListener('click', function () { stopEditing(); flip('ArrowRight'); });
 
-    // Notes are read-only so arrow keys always flip slides.
-    // Double-click to edit; Esc or clicking a button stops editing.
-    function stopEditing() {
-      if (notes.isContentEditable) { notes.removeAttribute('contenteditable'); notes.blur(); }
-    }
-    notes.addEventListener('dblclick', function () {
-      if (notes.isContentEditable) return;
+    // Notes are read-only until you click Edit, so arrow keys always flip
+    // slides. Done, Esc, Back, or Next stops editing.
+    function startEditing() {
       notes.contentEditable = 'true';
+      edit.textContent = 'Done';
+      edit.classList.add('on');
       notes.focus();
+    }
+    function stopEditing() {
+      if (!notes.isContentEditable) return;
+      notes.removeAttribute('contenteditable');
+      notes.blur();
+      edit.textContent = 'Edit';
+      edit.classList.remove('on');
+    }
+    edit.addEventListener('click', function () {
+      if (notes.isContentEditable) stopEditing(); else startEditing();
     });
+    notes.addEventListener('dblclick', function () { if (!notes.isContentEditable) startEditing(); });
+    saveBtn.addEventListener('click', function () { save(win, status); });
     // Keep focus off the buttons so Space and Enter don't flip twice.
-    nav.addEventListener('mousedown', function (e) { e.preventDefault(); stopEditing(); });
+    nav.addEventListener('mousedown', function (e) { e.preventDefault(); });
 
     // Copy edits into the deck so saving from either window keeps them.
     notes.addEventListener('input', function () {
       notesFor(slides[currentIndex()], true).innerHTML = notes.innerHTML;
+      status.textContent = 'Unsaved changes';
     });
 
     doc.addEventListener('keydown', function (e) {
-      if (isSave(e)) { e.preventDefault(); save(); return; }
+      if (isSave(e)) { e.preventDefault(); save(win, status); return; }
       // While editing, keys type; Esc stops editing.
       if (e.target.isContentEditable) { if (e.key === 'Escape') stopEditing(); return; }
       var keys = ['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp', 'Enter', 'Home', 'End'];
@@ -200,27 +215,43 @@
     return '<!DOCTYPE html>\n' + root.outerHTML + '\n';
   }
 
-  function save() {
+  // Remembered after the first save, so later saves overwrite the same
+  // file without asking again.
+  var fileHandle = null;
+
+  // ctx is the window the click or keypress happened in. Chrome only opens
+  // the save dialog from the window that has the user gesture, so a save
+  // started in the notes window must use the notes window's picker.
+  function save(ctx, status) {
+    ctx = ctx || window;
     var html = serialize();
-    if (window.showSaveFilePicker) {
-      window.showSaveFilePicker({
+    function say(t) { if (status) status.textContent = t; }
+    function write(handle) {
+      return handle.createWritable().then(function (w) {
+        return w.write(html).then(function () { return w.close(); });
+      }).then(function () { fileHandle = handle; say('Saved ' + new Date().toLocaleTimeString()); });
+    }
+    if (ctx.showSaveFilePicker) {
+      var pick = fileHandle ? Promise.resolve(fileHandle) : ctx.showSaveFilePicker({
         suggestedName: 'index.html',
         types: [{ description: 'HTML', accept: { 'text/html': ['.html'] } }]
-      }).then(function (handle) {
-        return handle.createWritable().then(function (w) {
-          return w.write(html).then(function () { return w.close(); });
-        });
-      }).catch(function (err) {
-        if (err && err.name !== 'AbortError') alert('Save failed: ' + err.message);
+      });
+      pick.then(write).catch(function (err) {
+        if (err && err.name === 'AbortError') return;
+        fileHandle = null;
+        say('Save failed');
+        ctx.alert('Save failed: ' + (err && err.message));
       });
       return;
     }
-    var a = document.createElement('a');
+    var doc = ctx.document;
+    var a = doc.createElement('a');
     a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
     a.download = 'index.html';
-    document.body.appendChild(a);
+    doc.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    say('Downloaded index.html');
   }
 
   /* ---------- keys ---------- */
