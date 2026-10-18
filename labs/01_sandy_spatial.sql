@@ -219,20 +219,35 @@ LIMIT 10;
 -- ----------------------------------------------------------------------------
 
 -- ---- CoCo prompt 2 · SQL to a notebook with visuals -------------------------
--- Turn labs/01_sandy_spatial.sql into a Snowflake Workspace notebook named
--- 03_sandy_spatial.ipynb that tells the same story with great visuals. Keep
--- the SQL as SQL cells, put the three knobs in one Parameters cell at the top,
--- and use markdown between steps to explain what each chart shows. Use Altair
--- and render the shapes with ST_ASGEOJSON (simplify county boundaries with
--- ST_SIMPLIFY so they draw fast). Include:
+-- Turn labs/01_sandy_spatial.sql into a new Snowflake Workspace notebook named
+-- labs/03_sandy_spatial_<your initials>.ipynb, adding a number if that name
+-- exists and never overwriting an existing notebook. Put get_active_session(),
+-- the table names and the knobs WITHIN_M = 6000, DISTANCE_M = 25000 and
+-- MIN_CLAIMS = 500 in one Python Parameters cell at the top, keep every query
+-- as a real SQL cell with a result variable that uses the knobs through Jinja,
+-- and add a short markdown cell before each chart saying what it shows. Use
+-- Altair only with alt.renderers.enable("mimetype"), get shapes with
+-- ST_ASGEOJSON(...)::STRING, simplify county boundaries with
+-- ST_SIMPLIFY(boundary, 200), never reverse polygon rings, and draw every map
+-- with .project(type="identity", reflectY=True). Use blues for counts, oranges
+-- for dollars and percentages, #29B5E8 and #FF9F36 for single-colour marks,
+-- and give every chart a clear title and formatted tooltips. Build:
 --   1. A map of Manhattan ZIP codes coloured by Sandy claims, with tooltips.
---   2. Two county maps side by side: claim count vs mean building paid.
---   3. A slope chart showing each county's rank by count vs rank by mean paid.
---   4. A slider that filters counties by minimum claims and re-ranks them by
---      mean paid in the browser, without rerunning SQL.
---   5. A Python loop that reruns the Step 2 spatial query at 0 to 80 km from
---      Manhattan and charts claims captured and the #1 county at each distance.
---   6. Inside vs outside FEMA's high-risk flood zone for the top 10 ZIPs, as
---      stacked bars next to a map of percent outside.
--- Use a consistent palette, clear titles, and run every cell to check it works.
+--   2. Two county maps side by side: claim count vs mean building paid, with
+--      independent colour scales.
+--   3. A labelled slope chart of each county's rank by count vs rank by mean
+--      paid.
+--   4. An alt.param slider from 100 to 10,000 that filters counties by minimum
+--      claims and re-ranks them by mean paid in the browser with a window rank
+--      transform, showing the rank on each bar.
+--   5. A Python loop that reruns the Step 2 spatial query with the distance as
+--      a bound parameter at 0 to 80 km in 10 km steps and charts claims
+--      captured, with points coloured by the #1 county.
+--   6. Stacked bars of claims inside vs outside FEMA's high-risk flood zone for
+--      the top 10 ZIPs, next to a map of percent outside.
+-- Run every cell, then fix and rerun until there are no errors, every map shows
+-- distinct outlines rather than a solid rectangle, 10009 is the top ZIP with 94
+-- claims, Manhattan is #9 by count and #1 by mean paid ($236,483) at 25 km, and
+-- 10009 has 31 of 94 claims outside the high-risk zone (33%). End with a short
+-- pass/fail list for these checks.
 -- ----------------------------------------------------------------------------
