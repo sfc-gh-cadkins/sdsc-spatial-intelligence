@@ -18,6 +18,17 @@
    In the notes window, arrow keys, space, or the Back and Next buttons flip
    slides. Click Edit to change the notes, then Done or Esc.
 
+   Notes-only pages
+   ----------------
+   Notes for the parts of the talk that happen outside the deck (labs,
+   demos) go after the last slide:
+     <section class="notes-page" data-topic="Lab: Types">
+       <aside class="notes">...</aside>
+     </section>
+   They never show in the deck. In the notes window, Next on the last slide
+   moves on to them without moving the deck, and the topic menu jumps
+   straight to any of them.
+
    Autosave
    --------
    Edits save about a second after you stop typing.
@@ -33,13 +44,17 @@
 
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
   if (!slides.length) return;
+  // Slides, then notes-only pages. Notes pages follow every slide in the
+  // file, so pages[i] is slides[i] for every slide index.
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.slide, .notes-page'));
+  var extras = pages.slice(slides.length);
 
   var MARK = 'data-notes-js';
   var STORE_KEY = 'speaker-notes:' + location.pathname;
   var style = document.createElement('style');
   style.setAttribute(MARK, '');
   style.textContent =
-    '.slide aside.notes { display: none !important; }' +
+    '.slide aside.notes, .notes-page { display: none !important; }' +
     '.notes-editing [contenteditable="true"]:hover { outline: 1px dashed rgba(41,181,232,.7); }' +
     '.notes-edit-banner { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 9999;' +
     ' background: #29b5e8; color: #fff; font: 600 13px/1 -apple-system, sans-serif; padding: 8px 14px;' +
@@ -47,7 +62,7 @@
   document.head.appendChild(style);
 
   var win = null;
-  // The slide whose notes the notes window is showing; edits save to it.
+  // The page whose notes the notes window is showing; edits save to it.
   var shownIndex = 0;
   var editing = false;
   var banner = null;
@@ -134,7 +149,7 @@
   }
 
   function currentNotes() {
-    return slides.map(function (s) {
+    return pages.map(function (s) {
       var a = notesFor(s, false);
       return a ? a.innerHTML : '';
     });
@@ -199,7 +214,7 @@
   (function applyStored() {
     var data = readStore();
     Object.keys(data).forEach(function (k) {
-      var s = slides[+k];
+      var s = pages[+k];
       if (!s) return;
       var a = notesFor(s, true);
       if (a.innerHTML !== data[k]) a.innerHTML = data[k];
@@ -208,14 +223,21 @@
 
   /* ---------- notes window ---------- */
 
+  // Show the notes for the deck's current slide.
   function render() {
+    shownIndex = currentIndex();
+    paint();
+  }
+
+  function paint() {
     if (!win || win.closed) return;
     var doc = win.document;
-    shownIndex = currentIndex();
-    var aside = notesFor(slides[shownIndex], false);
+    var aside = notesFor(pages[shownIndex], false);
     var body = doc.getElementById('notes');
     // Notes are authored in this repo, so copying their markup is safe.
     body.innerHTML = aside && aside.innerHTML.trim() ? aside.innerHTML : '';
+    var menu = doc.getElementById('topic');
+    if (menu) menu.value = shownIndex < slides.length ? 'slides' : String(shownIndex);
     doc.documentElement.scrollTop = 0;
   }
 
@@ -239,6 +261,7 @@
       '#status{flex:1;color:#6b7280;font:14px -apple-system,sans-serif}' +
       '#bar button{font:600 16px -apple-system,sans-serif;padding:10px 18px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#1f2937;cursor:pointer}' +
       '#bar button:hover{background:#f3f4f6}#bar .edit.on{border-color:#29b5e8;color:#11567f}' +
+      '#bar select{font:15px -apple-system,sans-serif;padding:9px 10px;border-radius:10px;border:1px solid #d1d5db;background:#fff;color:#1f2937;max-width:240px}' +
       '#bar .next{background:#29b5e8;border-color:#29b5e8;color:#fff}#bar .next:hover{background:#1e9fcc}';
     doc.head.appendChild(css);
 
@@ -250,7 +273,21 @@
     var edit = el(doc, 'button', 'edit', 'Edit');
     var back = el(doc, 'button', 'back', '\u2190 Back');
     var fwd = el(doc, 'button', 'next', 'Next \u2192');
-    [status, edit, back, fwd].forEach(function (n) { bar.appendChild(n); });
+    var items = [status];
+    var menu = null;
+    if (extras.length) {
+      menu = el(doc, 'select'); menu.id = 'topic';
+      var first = el(doc, 'option', null, 'Slides'); first.value = 'slides';
+      menu.appendChild(first);
+      extras.forEach(function (p, i) {
+        var o = el(doc, 'option', null, p.getAttribute('data-topic') || 'Notes ' + (i + 1));
+        o.value = String(slides.length + i);
+        menu.appendChild(o);
+      });
+      items.push(menu);
+    }
+    items.push(edit, back, fwd);
+    items.forEach(function (n) { bar.appendChild(n); });
     doc.body.appendChild(bar);
     statusEls.push(status);
 
@@ -275,26 +312,53 @@
       if (saveTimer) saveNow();
     }
 
+    // Step forward or back. Past the last slide, step through the notes-only
+    // pages and leave the deck where it is.
+    function go(dir) {
+      stopEditing();
+      var last = slides.length - 1;
+      if (shownIndex > last) {
+        shownIndex += dir;
+        if (shownIndex > pages.length - 1) shownIndex = pages.length - 1;
+        if (shownIndex <= last) { render(); return; }
+        paint();
+        return;
+      }
+      if (dir > 0 && currentIndex() === last && extras.length) {
+        shownIndex = last + 1;
+        paint();
+        return;
+      }
+      flip(dir > 0 ? 'ArrowRight' : 'ArrowLeft');
+    }
+
     edit.addEventListener('click', function () { if (notes.isContentEditable) stopEditing(); else startEditing(); });
-    back.addEventListener('click', function () { stopEditing(); flip('ArrowLeft'); });
-    fwd.addEventListener('click', function () { stopEditing(); flip('ArrowRight'); });
+    back.addEventListener('click', function () { go(-1); });
+    fwd.addEventListener('click', function () { go(1); });
+    if (menu) {
+      menu.addEventListener('change', function () {
+        stopEditing();
+        if (menu.value === 'slides') render(); else { shownIndex = +menu.value; paint(); }
+        menu.blur();
+      });
+    }
     notes.addEventListener('dblclick', function () { if (!notes.isContentEditable) startEditing(); });
     // Keep focus off the buttons so Space and Enter don't flip twice.
-    bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    bar.addEventListener('mousedown', function (e) { if (e.target.tagName !== 'SELECT') e.preventDefault(); });
 
     // Copy edits into the deck, then autosave.
     notes.addEventListener('input', function () {
-      notesFor(slides[shownIndex], true).innerHTML = notes.innerHTML;
+      notesFor(pages[shownIndex], true).innerHTML = notes.innerHTML;
       scheduleSave();
     });
 
     doc.addEventListener('keydown', function (e) {
       if (isSave(e)) { e.preventDefault(); saveNow(); return; }
       if (e.target.isContentEditable) { if (e.key === 'Escape') stopEditing(); return; }
-      var keys = ['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp', 'Enter', 'Home', 'End'];
-      if (keys.indexOf(e.key) === -1) return;
-      e.preventDefault();
-      flip(e.key);
+      if (e.target.tagName === 'SELECT') return;
+      if (['ArrowRight', ' ', 'PageDown', 'Enter'].indexOf(e.key) !== -1) { e.preventDefault(); go(1); return; }
+      if (['ArrowLeft', 'PageUp'].indexOf(e.key) !== -1) { e.preventDefault(); go(-1); return; }
+      if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); flip(e.key); render(); }
     });
   }
 

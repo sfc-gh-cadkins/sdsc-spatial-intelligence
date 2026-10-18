@@ -21,7 +21,8 @@ For the step-by-step path through every workshop section, see
   `presentations/index.html` in a browser. Press **N** in a deck for speaker
   notes. To edit notes and have them save straight into the deck, run
   `python3 go-further/presentations/serve.py` and open the deck at
-  <http://localhost:8000/>.
+  <http://localhost:8000/>. The intro deck's notes carry on past the last
+  slide for the labs and demos; use Next or the topic menu in the notes window.
 - [`skills/`](skills/): a Cortex Code skill that recreates a demo environment
   in your own account, including an optional CARTO connector.
 

@@ -24,7 +24,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 MAX_BYTES = 5 * 1024 * 1024
-SLIDE_START = re.compile(r'<section\b[^>]*\bclass="(?:[^"]*\s)?slide(?=[\s"])')
+# Slides and notes-only pages, in file order (matches notes.js `pages`).
+SLIDE_START = re.compile(r'<section\b[^>]*\bclass="(?:[^"]*\s)?(?:slide|notes-page)(?=[\s"])')
 NOTES = re.compile(r'<aside class="notes">.*?</aside>', re.S)
 
 
