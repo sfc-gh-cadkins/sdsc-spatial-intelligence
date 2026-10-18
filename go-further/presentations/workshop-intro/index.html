@@ -514,8 +514,13 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 <p>Location is a type, not just two number columns. Snowflake has two: one respects that the Earth is round, the other lays it flat. We support both, plus all the common projections, and you can store shapes as well-known text, well-known binary or GeoJSON. None of it's proprietary. It's the same stuff you'd expect anywhere else. And yes, every spatial project still starts with: what projection is this data in now?</p>
 <p>GEOGRAPHY treats the Earth as a sphere, the WGS84 coordinates your phone's GPS uses. Distances and areas come back in metres, measured along the Earth's surface. That's what we use today.</p>
 <p>GEOMETRY is a flat, planar map. Its units come from the coordinate system you pick, like feet in a state plane. Use it when your data's already projected or you need planar math.</p>
-<p><strong>Run Step 1</strong></p>
+<p><strong>Step 1 query, before you run it</strong></p>
 <p>Which Manhattan ZIP codes filed the most Sandy claims? Real Sandy claims by Manhattan ZIP code, against real ZIP boundaries. I'm not showing you anything you haven't done before, but most of this room has never done it on Snowflake.</p>
+<p>Here's what it does. Count Sandy claims per ZIP. Turn each ZIP boundary into a shape. Then for every ZIP: how big is it, how far is its middle from the southern tip of Manhattan, and is it within 3 km of the tip?</p>
+<p><strong>Run Step 1: top 10 ZIPs come back</strong></p>
+<p>East Village is first with 94 claims. Then Tribeca and SoHo with 80, and the Seaport with 74.</p>
+<p>Look at the last column. Only two ZIPs are within 3 km of the tip: the Seaport and Battery Park. Everyone else is FALSE.</p>
+<p>And East Harlem, 12.5 kilometres north, is fifth with 58 claims. So it wasn't just the tip that flooded.</p>
 <p><strong>Uncomment USE WAREHOUSE SDSC_WORKSHOP_WH_LARGE; and rerun</strong></p>
 <p>That's our superpower. Start small, then one line and I'm on 16 times the compute. Whether it's 100 rows or 100 million, that's how Snowflake scales. You pay only while it runs, and it suspends after 60 seconds.</p>
 <p><strong>Knob at the top: within_m</strong></p>
