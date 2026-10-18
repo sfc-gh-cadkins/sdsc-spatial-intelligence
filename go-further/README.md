@@ -13,6 +13,10 @@ For the step-by-step path through every workshop section, see
   [`../labs/04_build_the_pipeline.sql`](../labs/04_build_the_pipeline.sql),
   so run that first. Needs AI features, which self-service trials disable by
   default until a payment method is added.
+- [`carto-cli-forecast-cones/`](carto-cli-forecast-cones/README.md): an
+  advanced CoCo CLI prompt that builds a forecast-cone population workflow
+  and map in your own CARTO org. Needs the CARTO CLI, a CARTO connection, and
+  your own tract-population table.
 - [`presentations/`](presentations/): the workshop slide pages. Open
   `presentations/index.html` in a browser.
 - [`skills/`](skills/): a Cortex Code skill that recreates a demo environment
