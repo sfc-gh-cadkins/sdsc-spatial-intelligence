@@ -488,104 +488,160 @@ h2 { font-size: clamp(1.8rem, 5.2vh, 3.4rem); font-weight: 800; letter-spacing: 
 </script>
 <!-- Notes-only pages: shown in the speaker notes window after the last slide, never in the deck. -->
 <section class="notes-page" data-topic="Marketplace">
-  <aside class="notes"><p>Before we write a line of SQL: where does the data come from? Nobody emailed a CSV, and nobody loaded anything.</p>
+  <aside class="notes"><p><strong>Open Marketplace</strong></p>
+<p>Before we write a line of SQL: where does the data come from? Nobody emailed a CSV, and nobody loaded anything.</p>
+<p><strong>Click through Marketplace: Discover, the geospatial category</strong></p>
 <p>Thousands of data products, shared live. They show up as a database in your account. No copies, no pipelines to babysit. There's a whole geospatial category, and partners like CARTO are part of this ecosystem too. Ryan will show that later.</p>
+<p><strong>On the Snowflake Public Data (Free) listing</strong></p>
 <p>Free, instantly accessible, installed as SNOWFLAKE_PUBLIC_DATA_FREE. That's the name in every lab file. The claims table is FEMA's redacted claims, one row per claim, labelled by event and tagged with county and ZIP. The geography tables ship real county and ZIP boundaries.</p>
+<p><strong>Catalog: GEOGRAPHY_CHARACTERISTICS</strong></p>
 <p>Here are the boundaries, stored as text. Text isn't a shape yet. Hold that thought, because that's Pillar 1.</p></aside>
 </section>
 <section class="notes-page" data-topic="Workspaces and setup check">
-  <aside class="notes"><p>This is where we write SQL, and where you ran the setup check. The setup script also made a tiny warehouse that sleeps after 60 seconds.</p>
+  <aside class="notes"><p><strong>Projects › Workspaces (the Git-connected workspace)</strong></p>
+<p>This is where we write SQL, and where you ran the setup check. The setup script also made a tiny warehouse that sleeps after 60 seconds.</p>
+<p><strong>Point at the repo files in the sidebar</strong></p>
 <p>I connected this workspace straight to our GitHub repo. One API integration, then From Git repository, public repo, no credentials. Every lab file is already here. The steps are in the README.</p>
+<p><strong>Open labs/00_setup_and_check.sql and run it</strong></p>
 <p>If you haven't yet, run 00_setup_and_check.sql now.</p>
+<p><strong>Results: three OKs (144848, 1, NULL)</strong></p>
 <p>You should see three OKs. The 1 is right, it looks up one county on purpose. The NULL is right too, that check only tests a point inside a shape.</p>
+<p><strong>If someone has an error</strong></p>
 <p>If you got an error, you haven't clicked Get on the listing yet. Do that and rerun.</p></aside>
 </section>
 <section class="notes-page" data-topic="Lab: Types">
-  <aside class="notes"><p>Location is a type, not just two number columns. Snowflake has two: one respects that the Earth is round, the other lays it flat. We support both, plus all the common projections, and you can store shapes as well-known text, well-known binary or GeoJSON. None of it's proprietary. It's the same stuff you'd expect anywhere else. And yes, every spatial project still starts with: what projection is this data in now?</p>
+  <aside class="notes"><p><strong>Change from 00_setup to 01_sandy: highlight TO_GEOGRAPHY(value) in Step 1</strong></p>
+<p>Location is a type, not just two number columns. Snowflake has two: one respects that the Earth is round, the other lays it flat. We support both, plus all the common projections, and you can store shapes as well-known text, well-known binary or GeoJSON. None of it's proprietary. It's the same stuff you'd expect anywhere else. And yes, every spatial project still starts with: what projection is this data in now?</p>
 <p>GEOGRAPHY treats the Earth as a sphere, the WGS84 coordinates your phone's GPS uses. Distances and areas come back in metres, measured along the Earth's surface. That's what we use today.</p>
 <p>GEOMETRY is a flat, planar map. Its units come from the coordinate system you pick, like feet in a state plane. Use it when your data's already projected or you need planar math.</p>
+<p><strong>Run Step 1</strong></p>
 <p>Which Manhattan ZIP codes filed the most Sandy claims? Real Sandy claims by Manhattan ZIP code, against real ZIP boundaries. I'm not showing you anything you haven't done before, but most of this room has never done it on Snowflake.</p>
+<p><strong>Uncomment USE WAREHOUSE SDSC_WORKSHOP_WH_LARGE; and rerun</strong></p>
 <p>That's our superpower. Start small, then one line and I'm on 16 times the compute. Whether it's 100 rows or 100 million, that's how Snowflake scales. You pay only while it runs, and it suspends after 60 seconds.</p>
+<p><strong>Knob at the top: within_m</strong></p>
 <p>Set within_m to 6000. Rerun.</p>
+<p><strong>Results after the rerun</strong></p>
 <p>Five more ZIPs turn true. East Harlem, 12.5 kilometres north, stays false. Distance from the tip doesn't explain where Manhattan flooded.</p>
+<p><strong>Point at the functions in the Step 1 query</strong></p>
 <p>Three functions:</p>
 <ul><li>ST_AREA and ST_CENTROID: how big, and where's the middle?</li>
 <li>ST_DISTANCE: how far, in metres?</li>
 <li>ST_DWITHIN, distance within: is it within a threshold?</li></ul>
 <p>No special apparatus. Just typical ST functions and a cross join, all natural SQL. Most people export a CSV, put it in their GIS tool, convert it, and re-import it. Here you're just done in Snowflake.</p>
+<p><strong>Time check: 11:00, move on</strong></p>
 <p>Expected results are in the repo if you're still running.</p></aside>
 </section>
 <section class="notes-page" data-topic="Lab: Functions">
-  <aside class="notes"><p>That was one borough. An insurer thinks regionally: which counties around us took the most claims?</p>
+  <aside class="notes"><p><strong>Scroll to Step 2 · Functions</strong></p>
+<p>That was one borough. An insurer thinks regionally: which counties around us took the most claims?</p>
+<p><strong>Walk the Step 2 query</strong></p>
 <p>Four steps. Count Sandy claims by county. Turn each county boundary into geography. Take Manhattan's boundary as the anchor. Keep every county within 25 km, with ST_DWITHIN.</p>
+<p><strong>Run Step 2: results</strong></p>
 <p>Fifteen counties. Nassau is first with almost 27,000 claims, then Monmouth, then Queens. Manhattan itself is ninth.</p>
 <p>Who's missing? Ocean County, New Jersey. 37,459 claims, the hardest-hit county of the whole storm. It's 60 km away.</p>
+<p><strong>Knob at the top: distance_m, rerun</strong></p>
 <p>Set distance_m to 75000.</p>
+<p><strong>Results after the rerun</strong></p>
 <p>Ocean County jumps to number one. The distance you pick decides the answer you get. That's the most important habit in spatial analysis: say where you looked.</p>
+<p><strong>Caveat</strong></p>
 <p>These are whole-county totals for counties near Manhattan, not claims inside a circle. FEMA's coordinates aren't precise enough for that.</p></aside>
 </section>
 <section class="notes-page" data-topic="Lab: Flood zones">
-  <aside class="notes"><p>So far we've asked where the claims were. Now: did FEMA see them coming? Every flood policy is priced by a FEMA flood zone. The high-risk zones, A and V, are what FEMA calls the Special Flood Hazard Area. If the flood maps were right, almost every claim should come from inside those zones. Let's check.</p>
+  <aside class="notes"><p><strong>Scroll to Step 3 · Flood zones (before running)</strong></p>
+<p>So far we've asked where the claims were. Now: did FEMA see them coming? Every flood policy is priced by a FEMA flood zone. The high-risk zones, A and V, are what FEMA calls the Special Flood Hazard Area. If the flood maps were right, almost every claim should come from inside those zones. Let's check.</p>
+<p><strong>Walk the Step 3 SQL</strong></p>
 <p>Nothing spatial in this one. It's a COUNT_IF on the zone each policy was rated in, grouped by ZIP. Sometimes the most important spatial question is just a filter.</p>
+<p><strong>Run Step 3: results</strong></p>
 <p>Look at the Seaport and Tribeca: 8 to 10 percent outside the zone. That's the waterfront, and the map got it right. Now look at the East Village and Chelsea: about a third of their claims came from properties FEMA said were not high risk. And East Harlem, 12 kilometres from the tip, is half.</p>
 <p>Across Manhattan, more than one in four Sandy claims came from outside the high-risk zone. The flood map said lower risk. The water disagreed.</p>
+<p><strong>The business point</strong></p>
 <p>If you're underwriting off the zone alone, those are the policies you priced as safe. That's the 70% we talked about at the start: underwriting without real geography. The zone is a line on a map; the loss doesn't always respect the line.</p>
+<p><strong>Caveat</strong></p>
 <p>One caveat: this is the zone at the time of the loss. FEMA has redrawn New York's maps since Sandy, partly because of exactly this.</p></aside>
 </section>
 <section class="notes-page" data-topic="Ecosystem: hand to Ryan">
-  <aside class="notes"><p>That brings us to our third pillar: the ecosystem. You've already seen half of it. The FEMA data came from Marketplace, shared live, nothing loaded. The other half is partners.</p>
+  <aside class="notes"><p><strong>Back to the slides: Pillar 3, Ecosystem</strong></p>
+<p>That brings us to our third pillar: the ecosystem. You've already seen half of it. The FEMA data came from Marketplace, shared live, nothing loaded. The other half is partners.</p>
 <p>Everything we just built lives in Snowflake, and it's still a table. Think about who needs this answer: the underwriter deciding whether East Harlem is really low risk, the claims lead deciding where to send adjusters. They're not going to open a SQL worksheet. They need a map they can filter, share and drop into their own tools.</p>
+<p><strong>Hand to Ryan</strong></p>
 <p>That's what CARTO does, and it reads the exact county view we just built, live, with nothing exported. Ryan Miller from CARTO is going to show you. Ryan?</p></aside>
 </section>
 <section class="notes-page" data-topic="AI with CoCo">
-  <aside class="notes"><p>Everything so far was plain SQL. Now, how does AI help? This part runs on my account.</p>
+  <aside class="notes"><p><strong>Back from Ryan: open CoCo in the 01_sandy workspace</strong></p>
+<p>Everything so far was plain SQL. Now, how does AI help? This part runs on my account.</p>
+<p><strong>CoCo panel open</strong></p>
 <p>CoCo is Snowflake's coding agent. It reads your files, writes code, runs it, and checks the results, wherever you work: in the browser, on the desktop, or in a CLI.</p>
 <h3>SQL to Python</h3>
+<p><strong>Paste prompt 1 (bottom of 01_sandy) and send</strong></p>
 <p>Same lab, same three steps, same knobs, but in Python. Look at the last line of the prompt: I'm asking it to prove the numbers match.</p>
+<p><strong>While CoCo works</strong></p>
 <p>The spatial functions still run inside Snowflake. Python just orchestrates them. Nothing gets pulled down to my laptop.</p>
+<p><strong>Switch to the notebook</strong></p>
 <p>Let's see if CoCo can do this in Python. While it works, let me show you something you're more familiar with.</p>
 <h3>SQL to a notebook</h3>
+<p><strong>Open the finished Snowflake Notebook</strong></p>
 <p>Here's where that goes next: the same story as a Snowflake Notebook. A fully managed, interactive, cell-based environment in Snowsight that combines SQL, Python and Markdown in one workspace.</p>
+<p><strong>Point at the two county maps side by side</strong></p>
 <p>Count versus mean paid. Same counties, two different stories.</p>
+<p><strong>Point at the distance loop chart</strong></p>
 <p>Python reruns the spatial query from 0 to 80 km. Watch the number one county change as the circle grows.</p>
 <p>I'd normally spend an afternoon on this. CoCo built it from one prompt, and it's natively parallelized, so there's no rewriting to make it scale.</p>
+<p><strong>Back to CoCo: Python result</strong></p>
 <p>And the Python file's done. Same numbers: East Village on top, Manhattan number one by mean paid.</p>
+<p><strong>Close the section</strong></p>
 <p>We've gone from SQL, to Python, to notebooks with visuals. That's across the spectrum.</p></aside>
 </section>
 <section class="notes-page" data-topic="The pipeline">
-  <aside class="notes"><p>That map that Ryan showed us didn't come from a CSV someone exported. Here's what's underneath it.</p>
+  <aside class="notes"><p><strong>Slide: From share to answer</strong></p>
+<p>That map that Ryan showed us didn't come from a CSV someone exported. Here's what's underneath it.</p>
 <ul><li>It starts with the free listing you installed. FEMA claims and boundaries, shared live.</li>
 <li>The same filter you wrote in the lab, saved as a view. Sandy, New York and New Jersey: 132,388 claims.</li>
 <li>Step 2 of your lab, made permanent. 83 counties, each with its boundary. This is the one view Ryan's map reads.</li>
 <li>In a few moments we'll look at the semantic view, where we wrote down what the columns mean.</li>
 <li>CARTO, our Flood Risk Hub app and CoWork all read from the same place. Same data, same numbers.</li></ul>
+<p><strong>Point at the blue box</strong></p>
 <p>Everything inside that blue box is views. Nothing is copied, so when FEMA updates the listing, every layer is current on the next query.</p>
+<p><strong>Why it matters</strong></p>
 <p>Usually the hard part isn't the analysis. It's getting it off someone's laptop and in front of the people who need it. Here, the query you wrote is the production version.</p>
+<p><strong>Transition</strong></p>
 <p>The semantic view is where we write that down, once, in business terms. Let me show you.</p></aside>
 </section>
 <section class="notes-page" data-topic="Semantic view and agent">
-  <aside class="notes"><p>CoCo is for people who write code. But most people who need this answer will never open a notebook. So how do we give them the same answer, with the same numbers?</p>
+  <aside class="notes"><p><strong>Transition</strong></p>
+<p>CoCo is for people who write code. But most people who need this answer will never open a notebook. So how do we give them the same answer, with the same numbers?</p>
+<p><strong>Catalog › SDSC_WORKSHOP › SEMANTIC › SDSC_INSURANCE, open the definition</strong></p>
 <p>This is a semantic view. It's where we write down what our columns mean, in business terms, once.</p>
+<p><strong>Point at PAID_DENOMINATOR</strong></p>
 <p>Mean paid only counts claims with a payment recorded. Remember those 223 Manhattan claims with no payment? The raw table doesn't know to exclude them. This does.</p>
+<p><strong>Point at COUNTY</strong></p>
 <p>A New Yorker says Manhattan, not New York County. We taught it that.</p>
 <p>The SQL you ran today and the answers you're about to see use the same definitions. That's why the numbers will match.</p>
 <h3>The agent</h3>
+<p><strong>AI & ML › Agents › SDSC_FLOOD_RISK_AGENT</strong></p>
 <p>This is a Cortex Agent. Three things to notice:</p>
 <ul><li>Its tool is the semantic view we just looked at, so it uses our definitions and doesn't guess.</li>
 <li>The instructions tell it to show its SQL and to caveat that historical claims aren't future risk.</li>
 <li>It has sample questions, so a business user knows where to start.</li></ul>
 <p>We built it once. Now anyone in the company can ask it a question in plain English.</p>
+<p><strong>Open CoWork</strong></p>
 <p>Let's be that business user. No SQL, no notebook. Just a question.</p></aside>
 </section>
 <section class="notes-page" data-topic="CoWork">
-  <aside class="notes"><blockquote>For the same counties, compare claim volume with mean paid amount. Show counts, missingness, and the query. Explain what changed and why this doesn't establish future property risk.</blockquote>
+  <aside class="notes"><p><strong>Paste into CoWork and send</strong></p>
+<blockquote>For the same counties, compare claim volume with mean paid amount. Show counts, missingness, and the query. Explain what changed and why this doesn't establish future property risk.</blockquote>
+<p><strong>Point at the SQL</strong></p>
 <p>It shows its work.</p>
+<p><strong>Point at Manhattan's mean paid</strong></p>
 <p>About $236,483. The same number you got in the lab.</p>
+<p><strong>Point at the caveat</strong></p>
 <p>Historical claims are not future risk.</p>
+<p><strong>Wrap up CoWork</strong></p>
 <p>A business user asked the question in plain English. The evidence stays inspectable. Same data, same numbers, same caveats.</p></aside>
 </section>
 <section class="notes-page" data-topic="Close">
-  <aside class="notes"><p>Four pillars, one question. Types made location a real column. Functions answered "where" in SQL. The ecosystem brought the data, and CARTO made it shareable. AI helped build and explain it, and we checked every number.</p>
+  <aside class="notes"><p><strong>Back to the slides: Close</strong></p>
+<p>Four pillars, one question. Types made location a real column. Functions answered "where" in SQL. The ecosystem brought the data, and CARTO made it shareable. AI helped build and explain it, and we checked every number.</p>
+<p><strong>Closing line (memorize it)</strong></p>
 <p>I moved to New York in 2012 and watched Sandy flood this city. Fourteen years later, in the same city, you just found where it hit hardest, and what it cost, in a browser, with free public data. Swap the data for logistics, real estate or energy, and it works the same way. Spatial questions shouldn't need a spatial specialist.</p></aside>
 </section>
 <script src="../assets/notes.js"></script>
