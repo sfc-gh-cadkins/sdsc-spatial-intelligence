@@ -25,9 +25,8 @@ workshop in order: what to click, what to run, and what you should see.
 1. **Create a trial:** <https://signup.snowflake.com/>
 2. **Create a free CARTO account:** <https://app.carto.com/signup>
 3. **Get the lab files:** click the green **<> Code** button at the top of this page and choose **Download ZIP**. Unzip it and open the SQL files in a Snowflake worksheet.
-4. **Get the free data:** open *Snowflake Public Data (Free)* at
-   <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255> and click **Get**.
-5. **(Optional) Load the files into a Workspace from GitHub.** This is how we run it on
+
+   **(Optional) Load the files into a Workspace from GitHub.** This is how we run it on
    screen. In a SQL file, run this once (it lets Snowflake read public repos
    under this GitHub account; no credentials):
 
@@ -47,6 +46,9 @@ workshop in order: what to click, what to run, and what you should see.
 
    No permission to create an integration? Create a SQL file in Workspaces
    instead, and paste and run each file in order.
+
+4. **Get the free data:** open *Snowflake Public Data (Free)* at
+   <https://app.snowflake.com/marketplace/listing/GZTSZ290BV255> and click **Get**.
 
 Run the files in order. The Python and notebook versions of the lab are covered in the walkthrough:
 
