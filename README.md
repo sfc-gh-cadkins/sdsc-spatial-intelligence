@@ -17,7 +17,7 @@ presented by Snowflake and CARTO.
 
 ## Participant path: browser only
 
-You need a browser and a Snowflake trial account. Nothing to install or clone on your laptop. You don't need Python, a CLI, a CARTO account, or a credit card.
+You need a browser, a Snowflake trial account, and a free CARTO account. Nothing to install or clone on your laptop. You don't need Python, a CLI, or a credit card.
 
 **Start with [`WALKTHROUGH.md`](WALKTHROUGH.md).** It covers every section of the
 workshop in order: what to click, what to run, and what you should see.
