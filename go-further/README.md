@@ -13,6 +13,10 @@ For the step-by-step path through every workshop section, see
   [`../labs/04_build_the_pipeline.sql`](../labs/04_build_the_pipeline.sql),
   so run that first. Needs AI features, which self-service trials disable by
   default until a payment method is added.
+- [`custom-ai-function/`](custom-ai-function/README.md): the
+  `FLOOD_RISK_CLASSIFIER` custom AI function from the Flood Risk Hub app. One
+  SQL script creates it in your own account and runs it on real Sandy claims.
+  Needs AI features.
 - [`carto-cli-forecast-cones/`](carto-cli-forecast-cones/README.md): an
   advanced CoCo CLI prompt that builds a forecast-cone population workflow
   and map in your own CARTO org. Needs the CARTO CLI, a CARTO connection, and
