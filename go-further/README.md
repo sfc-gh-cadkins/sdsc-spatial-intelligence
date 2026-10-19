@@ -17,6 +17,10 @@ For the step-by-step path through every workshop section, see
   `FLOOD_RISK_CLASSIFIER` custom AI function from the Flood Risk Hub app. One
   SQL script creates it in your own account and runs it on real Sandy claims.
   Needs AI features.
+- [`carto-mcp/`](carto-mcp/README.md): connect CARTO's MCP server to a
+  Cortex Agent so CoWork can make CARTO maps. Covers the OAuth client, the
+  Snowflake integration, attaching it to the agent, and troubleshooting.
+  Needs a CARTO account and AI features.
 - [`carto-cli-forecast-cones/`](carto-cli-forecast-cones/README.md): an
   advanced CoCo CLI prompt that builds a forecast-cone population workflow
   and map in your own CARTO org. Needs the CARTO CLI, a CARTO connection, and

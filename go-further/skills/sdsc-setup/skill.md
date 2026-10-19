@@ -81,6 +81,8 @@ claims?"
 
 ## Step 6 (optional): CARTO MCP connector
 
+Full walkthrough: [`../../carto-mcp/README.md`](../../carto-mcp/README.md).
+
 Requires a CARTO account.
 
 1. In CARTO, go to **Developers > Credentials > SPA OAuth Clients**,
@@ -99,7 +101,7 @@ CREATE API INTEGRATION CARTO_MCP_OAUTH2
     OAUTH_CLIENT_ID = '<the actual Client ID, not the client display name>'
     OAUTH_CLIENT_SECRET = '<the Client Secret>'
     OAUTH_TOKEN_ENDPOINT = 'https://auth.carto.com/oauth/token'
-    OAUTH_AUTHORIZATION_ENDPOINT = 'https://auth.carto.com/authorize'
+    OAUTH_AUTHORIZATION_ENDPOINT = 'https://auth.carto.com/authorize?audience=carto-cloud-native-api'
     OAUTH_CLIENT_AUTH_METHOD = CLIENT_SECRET_BASIC
     OAUTH_ALLOWED_SCOPES = ('openid','profile','email','read:workflows','write:workflows')
   )
