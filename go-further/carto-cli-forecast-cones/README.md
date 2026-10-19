@@ -27,6 +27,41 @@ The prompt asks you for your CARTO connection name, database and schema,
 initials, and the tract table's fully qualified name. Don't paste tokens or
 passwords into the chat.
 
+## Install the CLIs
+
+Run these in a terminal on your own machine.
+
+**Snowflake CLI** (`snow`). CoCo CLI needs it installed:
+
+```bash
+brew install snowflake-cli        # macOS
+pipx install snowflake-cli        # any platform with Python 3.10+
+snow --version
+```
+
+Other platforms: [Installing Snowflake CLI](https://docs.snowflake.com/en/developer-guide/snowflake-cli/installation/installation).
+
+**CoCo CLI** (`cortex`):
+
+```bash
+curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh   # macOS, Linux, WSL
+cortex
+```
+
+On Windows PowerShell, use `irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex`.
+The first `cortex` run walks you through connecting to Snowflake. CoCo CLI isn't
+available on standard trial accounts; see
+[CoCo CLI](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli).
+
+**CARTO CLI** (`carto`). Needs Node.js 16 or later:
+
+```bash
+npm install -g @carto/carto-cli
+carto --version
+carto auth login
+carto auth status
+```
+
 ## The prompt
 
 Paste this into a new CoCo CLI session:
