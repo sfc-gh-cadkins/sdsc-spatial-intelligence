@@ -17,9 +17,10 @@ You need all of these. The prompt checks for them and stops if one is missing.
 - **A CARTO connection to your Snowflake account**, with a role that can create
   tables in one writable database and schema.
 - **A tract-population table in Snowflake**, with one row per census tract: a
-  unique tract ID, a population count, and a point geometry (for example, a
-  population-weighted or interior point). Note its source and population
-  vintage. This repo doesn't ship this table; bring your own.
+  unique tract ID, a population count, and a point geometry. This repo ships
+  [`sandy_tract_points.parquet`](DATA.md) (32,204 tracts, ACS 2023 population).
+  Load it with the CARTO CLI — see [DATA.md](DATA.md) for the command and
+  column descriptions.
 - Network access to `nhc.noaa.gov` for the public NHC forecast-cone and
   best-track archives.
 
