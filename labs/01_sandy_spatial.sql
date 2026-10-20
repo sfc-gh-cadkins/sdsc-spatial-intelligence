@@ -218,6 +218,30 @@ LIMIT 10;
 -- #9 by count but #1 by mean paid ($236,483).
 -- ----------------------------------------------------------------------------
 
+-- ---- CoCo prompt 3 · CARTO forecast-cone map (CoCo CLI) --------------------
+-- This prompt runs in CoCo CLI (Desktop or terminal), not in Snowsight.
+-- It needs the CARTO CLI, a CARTO connection to your Snowflake account, and
+-- the tract-population table from go-further/carto-cli-forecast-cones/.
+-- See that folder's README for prerequisites and install steps.
+--
+-- Build a Hurricane Sandy forecast-cone population workflow and interactive
+-- CARTO map using the CARTO CLI. Download the NHC forecast-cone archives for
+-- advisories 010, 012, 014, 020, 023, 026, and 028 from
+-- https://www.nhc.noaa.gov/gis/forecast/archive/ and the actual track from
+-- https://www.nhc.noaa.gov/gis/best_track/al182012_best_track.zip. Select
+-- each archive's _pgn shapefile and the best-track line shapefile, then load
+-- them with carto import. Use only the 120-hour cone for each advisory. Create
+-- and run a CARTO workflow that counts each tract once per advisory when its
+-- point falls inside the cone, and sums its full population, retaining
+-- zero-match cones. Create a private CARTO map with a seven-position slider
+-- for the selected advisories, population and tract counts, advisory and issue
+-- time, and the actual track above the cone. Prefix all new tables, the
+-- workflow, and the map with your initials and a unique run ID. Ask me for my
+-- CARTO connection name, writable Snowflake database and schema, initials, and
+-- the tract table's fully qualified name. Do not assume access to the
+-- presenters' environment.
+-- ----------------------------------------------------------------------------
+
 -- ---- CoCo prompt 2 · SQL to a notebook with visuals -------------------------
 -- Turn labs/01_sandy_spatial.sql into a new Snowflake Workspace notebook named
 -- labs/03_sandy_spatial_<your initials>.ipynb, adding a number if that name
